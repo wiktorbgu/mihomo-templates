@@ -712,6 +712,11 @@ rules:
   #- AND,((NETWORK,udp),(DST-PORT,138)),REJECT
   #- AND,((NETWORK,udp),(DST-PORT,139)),REJECT
 
+  # Локалка и DNS
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
   # QUIC трафик
   - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
   
