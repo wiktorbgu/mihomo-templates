@@ -422,6 +422,7 @@ rule-providers:
       # Hugging Face
       - DOMAIN-SUFFIX,huggingface.co
       - DOMAIN-SUFFIX,hf.co
+      - DOMAIN-SUFFIX,hf.space
       - DOMAIN-SUFFIX,huggingface.com
       - DOMAIN-KEYWORD,huggingface
 
@@ -449,6 +450,8 @@ rule-providers:
       - DOMAIN-SUFFIX,stackoverflow.com
       - DOMAIN-SUFFIX,docker.com
       - DOMAIN-SUFFIX,docker.io
+      - DOMAIN-SUFFIX,dockerstatic.com
+      - DOMAIN-SUFFIX,compose-spec.io            
       - DOMAIN-SUFFIX,npmjs.com
       - DOMAIN-SUFFIX,pypi.org
 
