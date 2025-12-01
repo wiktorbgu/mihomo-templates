@@ -1,127 +1,112 @@
+# Пример опций смотрите тут https://github.com/MetaCubeX/mihomo/blob/Meta/docs/config.yaml
 # === ОСНОВНЫЕ ПАРАМЕТРЫ ===
+# Разрешить подключения из локальной сети (например, с других устройств дома)
 allow-lan: true
+
+# Режим работы: "rule" — правила решают, куда направлять трафик
 mode: rule
+
+# Уровень подробности логов (например: info, warning, error)
 log-level: $LOG_LEVEL
+
+# Включить поддержку IPv6?
 ipv6: $IPV6
-unified-delay: true 
+
+# Делать задержки более естественными (чтобы не выдавать автоматизацию)
+unified-delay: true
+
+# Адрес и порт веб-интерфейса (например: 127.0.0.1:9090)
 external-controller: $EXTERNAL_CONTROLLER_ADDRESS:$UI_PORT
+
+# Путь к папке с интерфейсом на диске
 external-ui: $EXTERNAL_UI_PATH
+
+# Или ссылка на внешний веб-интерфейс в интернете
 external-ui-url: $EXTERNAL_UI_URL
+
+# Секретный ключ для защиты доступа к веб-панели
 secret: $UI_SECRET
 
 # === ПРОФИЛЬ ===
+
 #profile:
 #  store-selected: true
 
 # === SNIFFER (анализ трафика) ===
+# Эта часть "подглядывает", какие сайты открываются по имени домена, даже если они зашифрованы
 sniffer:
   enable: true
-  parse-pure-ip: true
-  force-dns-mapping: true
+  parse-pure-ip: true                 # Анализировать IP-адреса без домена
+  force-dns-mapping: true             # Принудительно использовать DNS для определения домена
   sniff:
     HTTP:
-      ports: [80, 8080-8880]
-      override-destination: true
+      ports: [80, 8080-8880]            # Где искать HTTP-трафик
+      override-destination: true        # Подменять получателя трафика
     TLS:
-      ports: [443, 8443]
+      ports: [443, 8443]                # Где искать зашифрованный HTTPS
     QUIC:
-      ports: [443, 8443]
+      ports: [443, 8443]                # Где искать QUIC трафик
 
 # === DNS НАСТРОЙКИ ===
 dns:
-  enable: $DNS_ENABLE
-#  prefer-h3: true
-#  use-hosts: true
-  use-system-hosts: $DNS_USE_SYSTEM_HOSTS
-#  listen: 127.0.0.1:53
-#  ipv6: false
-#  enhanced-mode: redir-host
-#  default-nameserver:
-#    - tls://1.1.1.1
-#    - tls://1.0.0.1
-#    - tls://8.8.8.8
-#    - tls://8.8.4.4
-#    - tls://9.9.9.9
-#  proxy-server-nameserver:
-#    - tls://1.1.1.1
-#    - tls://1.0.0.1
-#    - tls://8.8.8.8
-#    - tls://8.8.4.4
-#    - tls://9.9.9.9
-#    - https://cloudflare-dns.com/dns-query
-#    - https://9.9.9.9/dns-query
-#  direct-nameserver:
-#    - tls://77.88.8.8#DIRECT
-#    - https://77.88.8.8/dns-query#DIRECT
+  enable: $DNS_ENABLE                 # Включить собственный DNS-резолвер?
+  use-system-hosts: $DNS_USE_SYSTEM_HOSTS  # Использовать файл hosts из системы?
   nameserver:
-    - system
-#    - https://cloudflare-dns.com/dns-query#PROXY
+    - system                          # Использовать системный DNS (от роутера)
 
-# === LISTENERS (TUN + mixed) ===
+# === СЛУШАТЕЛИ (TUN + mixed) ===
+# Эти части принимают входящие подключения от приложений или системы
 listeners:
   - name: mixed-in
-    type: mixed
-    port: $MIXED_PORT
+    type: mixed                       # Принимает и HTTP, и SOCKS-запросы
+    port: $MIXED_PORT                 # Порт для приложений (например, браузера)
   - name: tun-in
-    type: tun
-    stack: $TUN_STACK
-    auto-detect-interface: $TUN_AUTO_DETECT_INTERFACE
-    auto-route: $TUN_AUTO_ROUTE
-    auto-redirect: $TUN_AUTO_REDIRECT
+    type: tun                         # Виртуальный сетевой интерфейс (для всего трафика системы)
+    stack: $TUN_STACK                 # Тип стека: system, gvisor, mixed
+    auto-detect-interface: $TUN_AUTO_DETECT_INTERFACE  # Автоопределение сетевого интерфейса
+    auto-route: $TUN_AUTO_ROUTE       # Автоматически перенаправлять весь трафик через TUN
+    auto-redirect: $TUN_AUTO_REDIRECT # Перехватывать трафик без настройки прокси в приложениях
     inet4-address:
-    - $TUN_INET4_ADDRESS
+      - $TUN_INET4_ADDRESS            # IP-адрес виртуального TUN-интерфейса
 
-# === ПОДПИСКА НА ПРОКСИ ===
+# === ПОДПИСКИ НА ПРОКСИ ===
+# Здесь подставляются прокси из внешних ссылок (например, из подписки)
 proxy-providers:
 $PROVIDERS_BLOCK
-#    override:
-#      tfo: true
-#      mptcp: true
-#      udp: true
+
 
 # === ГРУППЫ ПРОКСИ ===
 proxy-groups:
-# --- Фиксированная группа для example.com ---
-#- name: CORP-PROXY-FIXED
-#  type: select
-#  use:
-#    - SUB1
-#  filter: 'CORP-PROXY' # ← Замените на имя нужного прокси из подписки
-
-# Главный переключатель режимов.
+  # Основной переключатель: выбирает, как направлять трафик
   - name: SELECTOR
     type: select
     proxies:
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - PROXY AUTO     # Всё само настраивается
+      - PROXY MANUAL   # Сам выбираю прокси
+      - DIRECT         # Иду напрямую, без прокси
 
-  # Группа для автоматического режима.
-  # Логика: Сначала пытается использовать самый быстрый прокси (PROXY FASTEST).
-  # Если он падает, переключается на группу PROXY FAILOVER, которая переберет все остальные живые прокси.
-  # Если и там все мертвы, переключится на DIRECT.
+  # Полностью автоматический режим
+  # Сначала пробует самый быстрый прокси PROXY FASTEST, потом — любой рабочий PROXY FAILOVER, и только в крайнем случае — напрямую DIRECT
   - name: PROXY AUTO
     type: fallback
     proxies:
       - PROXY FASTEST
       - PROXY FAILOVER
       - DIRECT
-    url: http://www.msftncsi.com/ncsi.txt
+    url: http://www.msftncsi.com/ncsi.txt  # Адрес для проверки, работает ли прокси
     # Интервал для проверки, чтобы "отлипнуть" от DIRECT/PROXY FAILOVER и вернуться к PROXY FASTEST
-    interval: 200
+    interval: 200                            # Проверять каждые 200 секунд
 
-  # Группа для выбора самого быстрого из ЖИВЫХ прокси.
+  # Находит самый быстрый из всех рабочих прокси
   - name: PROXY FASTEST
     type: url-test
     use:
 $PROVIDERS_LIST
     url: http://www.msftncsi.com/ncsi.txt
-    # Интервал для пересортировки живых прокси по скорости
     interval: 300
     lazy: false
 
-  # Группа для перебора ВСЕХ живых прокси в случае отказа самого быстрого.
-  # Это гарантирует, что мы не переключимся на DIRECT, пока есть хоть один живой прокси.
+  # Если самый быстрый прокси упал — пробует остальные по очереди
   - name: PROXY FAILOVER
     type: fallback
     use:
@@ -129,12 +114,13 @@ $PROVIDERS_LIST
     url: http://www.msftncsi.com/ncsi.txt
     interval: 200
 
-  # Группа для ручного выбора сервера из подписки.
+  # Ручной выбор прокси — из списка подписки
   - name: PROXY MANUAL
     type: select
     use:
 $PROVIDERS_LIST
 
+  # Тот механизм, но только для российских прокси (если они есть в подписке)
   - name: PROXYRU AUTO
     type: fallback
     proxies:
@@ -142,32 +128,27 @@ $PROVIDERS_LIST
       - PROXYRU FAILOVER
       - DIRECT
     url: http://www.msftncsi.com/ncsi.txt
-    filter: '(?i)🇷🇺 |RU'  # ← Замените на префикс нужного прокси из подписки
-    # Интервал для проверки, чтобы "отлипнуть" от DIRECT/PROXY FAILOVER и вернуться к PROXY FASTEST
+    filter: '(?i)🇷🇺 |RU'   # Ищет прокси с флагом 🇷🇺 или надписью "RU"
     interval: 200
 
-  # Группа для выбора самого быстрого из ЖИВЫХ прокси.
   - name: PROXYRU FASTEST
     type: url-test
     use:
 $PROVIDERS_LIST
     url: http://www.msftncsi.com/ncsi.txt
     filter: '(?i)🇷🇺 |RU'
-    # Интервал для пересортировки живых прокси по скорости
     interval: 300
     lazy: false
 
-  # Группа для перебора ВСЕХ живых прокси в случае отказа самого быстрого.
-  # Это гарантирует, что мы не переключимся на DIRECT, пока есть хоть один живой прокси.
   - name: PROXYRU FAILOVER
     type: fallback
     use:
 $PROVIDERS_LIST
     url: http://www.msftncsi.com/ncsi.txt
-    filter: '(?i)🇷🇺 |RU' 
+    filter: '(?i)🇷🇺 |RU'
     interval: 200
 
-  # Скрыть ли группу GLOBAL
+  # Объединяет все основные варианты в одном месте
   - name: GLOBAL
     type: select
     hidden: false
@@ -178,42 +159,45 @@ $PROVIDERS_LIST
       - PROXY FAILOVER
       - DIRECT
 
-# --- Системные группы ---
+  # Специальная группа для обработки QUIC-трафика
   - name: QUIC
     type: select
     proxies:
-      - PASS
-      - REJECT
-# --- Группы приложений (из шаблона) ---
+      - PASS    # Пропустить без изменений
+      - REJECT  # Заблокировать
+
+  # === ГРУППЫ ПО ПРИЛОЖЕНИЯМ ===
+  # Каждая группа отвечает за свой сервис и показывает иконку в интерфейсе
+
   - name: Telegram
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
     include-all: true
     proxies:
       - SELECTOR
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: WhatsApp
     type: select
     icon: https://github.com/OMchik33/Whatsapp-icon/blob/master/icons/whatsapp_194x194.png?raw=true
     include-all: true
     proxies:
-      - SELECTOR      
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: Steam
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Steam.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: YouTube
     type: select
@@ -221,82 +205,83 @@ $PROVIDERS_LIST
     include-all: true
     proxies:
       - SELECTOR
-      - PROXYRU AUTO
-      - PROXY AUTO     # Полностью автоматический режим      
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - PROXYRU AUTO   # Может быть быстрее для российских пользователей
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: Twitch
     type: select
     icon: https://img.icons8.com/3d-fluency/94/twitch.png
-    include-all: true    
+    include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: AI & Разработка
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: GoogleGemini
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: OpenAI
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: Microsoft
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Microsoft.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: Anthropic
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
   - name: Perplexity
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
     include-all: true
     proxies:
-      - SELECTOR    
-      - PROXY AUTO     # Полностью автоматический режим
-      - PROXY MANUAL   # Ручной выбор
-      - DIRECT        # Принудительный прямой доступ
+      - SELECTOR
+      - PROXY AUTO
+      - PROXY MANUAL
+      - DIRECT
 
-# === RULE PROVIDERS (из шаблона) ===
+# === ПРАВИЛА ИЗ ВНЕШНИХ ИСТОЧНИКОВ ===
+# Эти правила подгружаются из интернета и обновляются раз в сутки
 rule-providers:
   telegram-domain:
     type: http
@@ -375,8 +360,8 @@ rule-providers:
     behavior: domain
     format: mrs
     url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/microsoft.mrs
-    path: ./rule-sets/mikrosoft.mrs
-    interval: 86400      
+    path: ./rule-sets/microsoft.mrs
+    interval: 86400
 
   anthropic:
     type: http
@@ -384,7 +369,7 @@ rule-providers:
     format: mrs
     url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/anthropic.mrs
     path: ./rule-sets/anthropic.mrs
-    interval: 86400 
+    interval: 86400
 
   perplexity:
     type: http
@@ -392,7 +377,7 @@ rule-providers:
     format: mrs
     url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/perplexity.mrs
     path: ./rule-sets/perplexity.mrs
-    interval: 86400 
+    interval: 86400
 
   discord_voiceips:
     type: http
@@ -426,25 +411,25 @@ rule-providers:
 #    path: ./ru-bundle/rule.mrs
 #    interval: 86400
 
-  github-ai:
+  # Список доменов для ИИ и разработки, заданный прямо здесь
+  mixed-ai:
     type: inline
     behavior: classical
     format: text
     payload:
-
-# xAI (Grok)
+      # xAI (Grok)
       - DOMAIN-SUFFIX,x.ai
       - DOMAIN-SUFFIX,grok.x.ai
       - DOMAIN-SUFFIX,api.x.ai
       - DOMAIN-KEYWORD,grok
 
-# Hugging Face
+      # Hugging Face
       - DOMAIN-SUFFIX,huggingface.co
       - DOMAIN-SUFFIX,hf.co
       - DOMAIN-SUFFIX,huggingface.com
       - DOMAIN-KEYWORD,huggingface
 
-# Midjourney & Creative AI
+      # Midjourney и другие ИИ для изображений
       - DOMAIN-SUFFIX,midjourney.com
       - DOMAIN-SUFFIX,cdn.midjourney.com
       - DOMAIN-KEYWORD,midjourney
@@ -454,14 +439,14 @@ rule-providers:
       - DOMAIN-SUFFIX,runwayml.com
       - DOMAIN-SUFFIX,runway.ml
 
-# Character.AI & Others
+      # Character.AI и другие
       - DOMAIN-SUFFIX,character.ai
       - DOMAIN-SUFFIX,beta.character.ai
       - DOMAIN-SUFFIX,replicate.com
       - DOMAIN-SUFFIX,cohere.ai
       - DOMAIN-SUFFIX,cohere.com
 
-# Development Tools
+      # Инструменты для программистов
       - DOMAIN-SUFFIX,jetbrains.com
       - DOMAIN-SUFFIX,replit.com
       - DOMAIN-SUFFIX,repl.it
@@ -472,41 +457,42 @@ rule-providers:
       - DOMAIN-SUFFIX,pypi.org
 
 # === ПРАВИЛА МАРШРУТИЗАЦИИ ===
+# Правила читаются сверху вниз: первое подходящее — срабатывает
 rules:
-# --- 1. Корпоративный ресурс: строго через фиксированный прокси ---
-#- DOMAIN-SUFFIX,example.com,CORP-PROXY-FIXED
-# Локалка и DNS
+  # Локальная сеть и сам компьютер — всегда напрямую
   - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
   - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
   - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
   - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
 
-# --- 2. Безопасность: блокировка уязвимых UDP портов ---
-#- AND,((NETWORK,udp),(DST-PORT,135)),REJECT
-#- AND,((NETWORK,udp),(DST-PORT,137)),REJECT
-#- AND,((NETWORK,udp),(DST-PORT,138)),REJECT
-#- AND,((NETWORK,udp),(DST-PORT,139)),REJECT
+  # --- 2. Безопасность: блокировка уязвимых UDP портов ---
+  #- AND,((NETWORK,udp),(DST-PORT,135)),REJECT
+  #- AND,((NETWORK,udp),(DST-PORT,137)),REJECT
+  #- AND,((NETWORK,udp),(DST-PORT,138)),REJECT
+  #- AND,((NETWORK,udp),(DST-PORT,139)),REJECT
+  # QUIC-трафик (например, YouTube) направляем в специальную группу
   - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
-# --- 3. Приложения и сервисы ---
-  - RULE-SET,github-ai,AI & Разработка
+
+  # Правила для конкретных сервисов
+  - RULE-SET,mixed-ai,AI & Разработка
   - OR,((RULE-SET,telegram-domain),(RULE-SET,telegram-ips)),Telegram
   - RULE-SET,whatsapp-domain,WhatsApp
   - OR,((RULE-SET,discord_domains),(RULE-SET,discord_voiceips)),SELECTOR
   - OR,((RULE-SET,steam-domain),(RULE-SET,steam-ips)),Steam
   - RULE-SET,anthropic,Anthropic
-  - RULE-SET,perplexity,Perplexity      
+  - RULE-SET,perplexity,Perplexity
   - RULE-SET,google_gemini,GoogleGemini
   - RULE-SET,openai,OpenAI
-  - RULE-SET,microsoft,Microsoft   
+  - RULE-SET,microsoft,Microsoft
   - RULE-SET,twitch-domain,Twitch
-  - RULE-SET,youtube,YouTube  
+  - RULE-SET,youtube,YouTube
 #  - RULE-SET,ru-bundle,SELECTOR
-# --- 4. Инструменты проверки IP ---
+  # Инструменты для проверки своего IP — пускать через прокси, чтобы не раскрывать реальный адрес
   - OR,((DOMAIN,ipwho.is),(DOMAIN,api.ip.sb),(DOMAIN,ipapi.co),(DOMAIN,ipinfo.io)),SELECTOR
-# --- 5. Реклама ---
 #  - RULE-SET,oisd_big,REJECT
-# --- 6. TUN интерфейс и mixed ---
+  # Трафик, пришедший через TUN или mixed-порт — направлять в основной селектор
   - IN-NAME,tun-in,SELECTOR
   - IN-NAME,mixed-in,SELECTOR
-# --- 7. Весь остальной трафик ---
+
+  # Всё остальное — в основной селектор
   - MATCH,SELECTOR
