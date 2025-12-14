@@ -1,0 +1,564 @@
+# === ОСНОВНЫЕ НАСТРОЙКИ ===
+# Разрешить другим устройствам в локальной сети подключаться к этому прокси
+allow-lan: true
+
+# Режим работы: "rule" значит, что трафик будет распределяться по правилам (а не "всё через один прокси")
+mode: rule
+
+# Насколько подробно писать в журнал (log): error — только ошибки, info — больше деталей и т.д.
+log-level: $LOG_LEVEL
+
+# Включить поддержку IPv6 (новый формат IP-адресов)? Можно true или false.
+ipv6: $IPV6
+
+# Эта настройка делает проверку скорости прокси более точной
+unified-delay: true
+
+# Адрес и порт, по которому будет доступна веб-панель управления (например, 0.0.0.0:9090)
+external-controller: $EXTERNAL_CONTROLLER_ADDRESS:$UI_PORT
+
+# Папка, куда распакуется интерфейс панели (например, dist)
+external-ui: $EXTERNAL_UI_PATH
+
+# Ссылка, откуда скачивать веб-интерфейс панели (например, ZIP-архив с GitHub)
+external-ui-url: $EXTERNAL_UI_URL
+
+# Пароль для доступа к панели управления — без него любой сможет всё поменять!
+secret: $UI_SECRET
+
+# === АНАЛИЗ ТРАФИКА (SNIFFER) ===
+# Эта функция "подслушивает" трафик и пытается понять, куда идёт запрос (даже если он зашифрован)
+sniffer:
+  # Включить "подслушиватель"
+  enable: true
+
+  # Если сайт вызывается по IP (а не по имени), всё равно попробовать узнать, что это за сайт
+  parse-pure-ip: true
+
+  # Если сайт вызывается по IP, но мы знаем его домен — подставить домен вместо IP
+  force-dns-mapping: true
+
+  # Настройки для разных протоколов:
+  sniff:
+    # HTTP — обычные сайты (без замочка в адресной строке)
+    HTTP:
+      # Порты, на которых может работать HTTP
+      ports: [80, 8080-8880]
+      # Если сайт вызывается по IP, но мы его узнали — заменить IP на домен
+      override-destination: true
+
+    # TLS — зашифрованные сайты (с замочком, например, https://)
+    TLS:
+      ports: [443, 8443]
+
+    # QUIC — современный протокол, который тоже использует порт 443 (часто в YouTube, Google и т.д.)
+    QUIC:
+      ports: [443, 8443]
+
+# === DNS (КАК УЗНАВАТЬ IP АДРЕСА САЙТОВ) ===
+dns:
+  # Включить систему DNS (без неё не будут работать доменные имена вроде google.com)
+  enable: $DNS_ENABLE
+
+  # Использовать ли файл /etc/hosts (там можно вручную прописать, например, "заблокировать youtube.com")
+  use-system-hosts: $DNS_USE_SYSTEM_HOSTS
+
+  # Использовать DNS-серверы, которые указаны в системе (например, 1.1.1.1, 8.8.8.8 и т.д.)
+  nameserver:
+    - system
+
+# === ГДЕ СЛУШАТЬ ПОДКЛЮЧЕНИЯ ===
+# Mihomo может принимать трафик с разных "входов". Вот два основных:
+listeners:
+  - name: mixed-in
+    type: mixed
+    port: $MIXED_PORT # Обычно 1080
+  - name: tun-in
+    type: tun
+    stack: $TUN_STACK # Какая система сетевых правил используется (обычно "system")
+    auto-detect-interface: $TUN_AUTO_DETECT_INTERFACE # Сам найдёт основной сетевой интерфейс
+    auto-route: $TUN_AUTO_ROUTE # Автоматически перенаправит весь трафик
+    auto-redirect: $TUN_AUTO_REDIRECT # Перехватит даже DNS-запросы
+    inet4-address:
+      - $TUN_INET4_ADDRESS # IP-адрес виртуального TUN-интерфейса
+
+# === ПОДПИСКИ НА ПРОКСИ ===
+# Сюда подставляются автоматически сгенерированные блоки из entrypoint.sh:
+# — PROVIDERS_BLOCK — обычные подписки (SUB1, SUB2...)
+# — PROVIDERS_CHAIN_BLOCK — цепочки "через Россию"
+proxy-providers:
+$PROVIDERS_BLOCK
+$PROVIDERS_CHAIN_BLOCK
+
+# === ГРУППЫ ПРОКСИ (ГЛАВНОЕ МЕНЮ ТРАФИКА) ===
+# Группы — это как "папки" с прокси. Некоторые выбирают сами, другие — работают автоматически.
+proxy-groups:
+  # Быстрейший иностранный прокси (автоматически проверяет скорость)
+  - name: FASTEST
+    type: url-test
+    use:
+$PROVIDERS_LIST
+    # Исключаем AWG/WARP и российские серверы (они нам не нужны для "иностранных")
+    exclude-filter: "(?i)awg|warp|🇷🇺 |RU"
+    # Сайт для проверки скорости
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 300 # Проверять каждые 5 минут
+    lazy: false # Проверять сразу при запуске
+
+  # Надёжный иностранный прокси (автоматически переключается, если текущий упал)
+  - name: FAILOVER
+    type: fallback
+    use:
+$PROVIDERS_LIST
+    exclude-filter: "(?i)awg|warp|🇷🇺 |RU"
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 200 # Проверять каждые ~3 минуты
+
+  # Ручной выбор — ты сам выбираешь, какой прокси использовать
+  - name: MANUAL
+    type: select
+    use:
+$PROVIDERS_LIST
+
+  # Быстрейший российский прокси
+  - name: RU_FASTEST
+    type: url-test
+    use:
+$PROVIDERS_LIST
+    exclude-filter: "(?i)awg|warp"
+    filter: "(?i)🇷🇺 |RU" # Берём ТОЛЬКО российские серверы
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 300
+    lazy: false
+
+  # Надёжный российский прокси
+  - name: RU_FAILOVER
+    type: fallback
+    use:
+$PROVIDERS_LIST
+    exclude-filter: "(?i)awg|warp"
+    filter: "(?i)🇷🇺 |RU"
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 200
+
+  # Автоматика для иностранных серверов: сначала FASTEST, потом FAILOVER, иначе напрямую
+  - name: AUTO
+    type: fallback
+    proxies:
+      - FASTEST
+      - FAILOVER
+      - DIRECT
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 200
+
+  # Автоматика для российских серверов
+  - name: RU_AUTO
+    type: fallback
+    proxies:
+      - RU_FASTEST
+      - RU_FAILOVER
+      - DIRECT
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 200
+
+  # В заграницу через Россию: использует цепочки
+  - name: VIA_RU_AUTO
+    type: fallback
+    proxies:
+      - VIA_RU_FASTEST
+      - VIA_RU_FAILOVER
+      - AUTO # Если через Россию не получится, то просто иностранные
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 200
+
+  - name: VIA_RU_FASTEST
+    type: url-test
+    use:
+$PROVIDERS_CHAIN_LIST
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 300
+
+  - name: VIA_RU_FAILOVER
+    type: fallback
+    use:
+$PROVIDERS_CHAIN_LIST
+    url: http://www.msftncsi.com/ncsi.txt
+    interval: 200
+
+  # Главный переключатель — его видно в панели управления
+  - name: SELECTOR
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Proxy.png
+    proxies:
+      - VIA_RU_AUTO # Через Россию в заграницу
+      - AUTO        # Через заграницу
+      - MANUAL      # В ручную
+      - RU_AUTO     # Через Россию
+      - DIRECT      # Напрямую
+
+  # Глобальный маршрут — почти такой же, но может использоваться в правилах
+  - name: GLOBAL
+    type: select
+    hidden: false
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO      
+      - MANUAL      
+      - RU_AUTO
+      - DIRECT
+
+  # Специальная группа для QUIC-трафика (обычно блокируется или пропускается как есть)
+  - name: QUIC
+    type: select
+    proxies:
+      - PASS # Пропустить без изменений
+      - REJECT # Заблокировать
+
+  # === ОСОБЫЕ ГРУППЫ ДЛЯ ПОПУЛЯРНЫХ СЕРВИСОВ ===
+  # Для каждого сервиса — отдельный переключатель с иконкой.
+  # "include-all: true" значит: показывать ВСЕ доступные прокси для этого сервиса.
+  - name: TELEGRAM
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: WHATSAPP
+    type: select
+    icon: https://github.com/OMchik33/Whatsapp-icon/blob/master/icons/whatsapp_194x194.png?raw=true
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: STEAM
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Steam.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: YOUTUBE
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
+    include-all: true
+    proxies:
+      - RU_AUTO
+      - AUTO       
+      - MANUAL
+      - VIA_RU_AUTO
+      - DIRECT
+
+  - name: TWITCH
+    type: select
+    icon: https://img.icons8.com/3d-fluency/94/twitch.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: AI_DEV
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: GOOGLE_GEMINI
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: OPENAI
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: MICROSOFT
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Microsoft.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: ANTHROPIC
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+  - name: PERPLEXITY
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
+    include-all: true
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO        
+      - MANUAL
+      - RU_AUTO
+      - DIRECT
+
+# === ПРАВИЛА: ОТКУДА БРАТЬ СПИСКИ САЙТОВ ===
+# Вместо того чтобы писать сайты вручную, мы подгружаем готовые списки из интернета.
+rule-providers:
+  telegram-domain:
+    type: http
+    behavior: domain # Это список доменов (сайтов)
+    format: mrs # Формат файла (Meta Ruleset)
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/telegram.mrs
+    path: ./rule-sets/telegram-domain.mrs
+    interval: 86400 # Обновлять раз в сутки
+
+  telegram-ips:
+    type: http
+    behavior: ipcidr # Это список IP-адресов
+    format: yaml
+    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/telegram-ips.yaml
+    path: ./rule-sets/telegram-ips.yaml
+    interval: 86400
+
+  # Аналогично для WhatsApp, Steam, Twitch, Discord и других сервисов...
+  whatsapp-domain:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/whatsapp.mrs
+    path: ./rule-sets/whatsapp-domain.mrs
+    interval: 86400
+
+  steam-domain:
+    type: http
+    behavior: domain
+    format: yaml
+    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/gaming-domains.yaml
+    path: ./rule-sets/steam-domain.yaml
+    interval: 86400
+
+  steam-ips:
+    type: http
+    behavior: ipcidr
+    format: yaml
+    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/gaming-ips.yaml
+    path: ./rule-sets/steam-ips.yaml
+    interval: 86400
+
+  twitch-domain:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/twitch.mrs
+    path: ./rule-sets/twitch-domain.mrs
+    interval: 86400
+
+  discord_domains:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/discord.mrs
+    path: ./rule-sets/discord_domains.mrs
+    interval: 86400
+
+  google_gemini:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/google-gemini.mrs
+    path: ./rule-sets/google-gemini.mrs
+    interval: 86400
+
+  openai:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/openai.mrs
+    path: ./rule-sets/openai.mrs
+    interval: 86400
+
+  microsoft:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/microsoft.mrs
+    path: ./rule-sets/microsoft.mrs
+    interval: 86400
+
+  anthropic:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/anthropic.mrs
+    path: ./rule-sets/anthropic.mrs
+    interval: 86400
+
+  perplexity:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/perplexity.mrs
+    path: ./rule-sets/perplexity.mrs
+    interval: 86400
+
+  discord_voiceips:
+    type: http
+    behavior: ipcidr
+    format: mrs
+    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/other/discord-voice-ip-list.mrs
+    path: ./rule-sets/discord_voiceips.mrs
+    interval: 86400
+
+  youtube:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/youtube.mrs
+    path: ./rule-sets/youtube.mrs
+    interval: 86400
+
+  # Правила блокировки рекламы и нежелательного контента (OISD)
+  #  oisd_big:
+  #    type: http
+  #    behavior: domain
+  #    format: mrs
+  #    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/oisd/big.mrs
+  #    path: ./oisd/big.mrs
+  #    interval: 86400
+
+  #  ru-bundle:
+  #    type: http
+  #    behavior: domain
+  #    format: mrs
+  #    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/ru-bundle/rule.mrs
+  #    path: ./ru-bundle/rule.mrs
+  #    interval: 86400
+
+  # Некоторые правила вписаны прямо здесь (inline), без внешнего файла:
+  mixed-ai:
+    type: inline
+    behavior: classical
+    format: text
+    payload:
+      # xAI (Grok)
+      - DOMAIN-SUFFIX,x.ai
+      - DOMAIN-SUFFIX,grok.x.ai
+      - DOMAIN-SUFFIX,api.x.ai
+      - DOMAIN-KEYWORD,grok
+
+      # Hugging Face
+      - DOMAIN-SUFFIX,huggingface.co
+      - DOMAIN-SUFFIX,hf.co
+      - DOMAIN-SUFFIX,hf.space
+      - DOMAIN-SUFFIX,huggingface.com
+      - DOMAIN-KEYWORD,huggingface
+
+      # Midjourney и другие ИИ для изображений
+      - DOMAIN-SUFFIX,midjourney.com
+      - DOMAIN-SUFFIX,cdn.midjourney.com
+      - DOMAIN-KEYWORD,midjourney
+      - DOMAIN-SUFFIX,stability.ai
+      - DOMAIN-SUFFIX,stablediffusionweb.com
+      - DOMAIN-SUFFIX,dreamstudio.ai
+      - DOMAIN-SUFFIX,runwayml.com
+      - DOMAIN-SUFFIX,runway.ml
+
+      # Character.AI и другие
+      - DOMAIN-SUFFIX,character.ai
+      - DOMAIN-SUFFIX,beta.character.ai
+      - DOMAIN-SUFFIX,replicate.com
+      - DOMAIN-SUFFIX,cohere.ai
+      - DOMAIN-SUFFIX,cohere.com
+
+      # Инструменты для программистов
+      - DOMAIN-SUFFIX,jetbrains.com
+      - DOMAIN-SUFFIX,replit.com
+      - DOMAIN-SUFFIX,repl.it
+      - DOMAIN-SUFFIX,stackoverflow.com
+      - DOMAIN-SUFFIX,docker.com
+      - DOMAIN-SUFFIX,docker.io
+      - DOMAIN-SUFFIX,dockerstatic.com
+      - DOMAIN-SUFFIX,compose-spec.io
+      - DOMAIN-SUFFIX,npmjs.com
+      - DOMAIN-SUFFIX,pypi.org
+
+# === ГЛАВНЫЕ ПРАВИЛА: КАК РАСПРЕДЕЛЯТЬ ТРАФИК ===
+rules:
+  # Локальные адреса — всегда напрямую (без прокси)
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+
+  # Безопасность: блокировка уязвимых UDP портов
+  #- AND,((NETWORK,udp),(DST-PORT,135)),REJECT
+  #- AND,((NETWORK,udp),(DST-PORT,137)),REJECT
+  #- AND,((NETWORK,udp),(DST-PORT,138)),REJECT
+  #- AND,((NETWORK,udp),(DST-PORT,139)),REJECT
+
+  # QUIC-трафик (часто на порту 443) отправляем в группу QUIC
+  - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
+
+  # Правила для конкретных сервисов:
+  - RULE-SET,mixed-ai,AI_DEV
+  - OR,((RULE-SET,telegram-domain),(RULE-SET,telegram-ips)),TELEGRAM
+  - RULE-SET,whatsapp-domain,WHATSAPP
+  - OR,((RULE-SET,discord_domains),(RULE-SET,discord_voiceips)),SELECTOR
+  - OR,((RULE-SET,steam-domain),(RULE-SET,steam-ips)),STEAM
+  - RULE-SET,anthropic,ANTHROPIC
+  - RULE-SET,perplexity,PERPLEXITY
+  - RULE-SET,google_gemini,GOOGLE_GEMINI
+  - RULE-SET,openai,OPENAI
+  - RULE-SET,microsoft,MICROSOFT
+  - RULE-SET,twitch-domain,TWITCH
+  - RULE-SET,youtube,YOUTUBE
+  #- RULE-SET,ru-bundle,SELECTOR
+
+  # Проверки собственного IP — отправляем через прокси, чтобы не раскрыть реальный адрес
+  - OR,((DOMAIN,ipwho.is),(DOMAIN,api.ip.sb),(DOMAIN,ipapi.co),(DOMAIN,ipinfo.io)),SELECTOR
+  #- RULE-SET,oisd_big,REJECT
+
+  # Весь трафик, пришедший через TUN или mixed-in, отправляется в главный переключатель
+  - IN-NAME,tun-in,SELECTOR
+  - IN-NAME,mixed-in,SELECTOR
+
+  # Всё остальное — тоже в SELECTOR (это правило-ловушка в самом конце)
+  - MATCH,SELECTOR
