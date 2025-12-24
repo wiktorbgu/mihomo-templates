@@ -1,5 +1,5 @@
---- ./original/entrypoint.sh	2025-11-24 23:34:25.000000000 +0300
-+++ ./entrypoint.sh	2025-12-24 23:50:02.353834628 +0300
+--- ./original/entrypoint.sh	2025-12-17 22:07:09.000000000 +0300
++++ ./entrypoint.sh	2025-12-24 23:58:19.333145679 +0300
 @@ -39,6 +39,10 @@
    fi
  fi
@@ -19,27 +19,7 @@
  
  proxy-groups:
    - name: SELECTOR
-@@ -175,19 +180,15 @@
- 
-   echo "  - name: \"$awg_name\""
-   echo "    type: wireguard"
--
-   [ -n "$private_key" ] && echo "    private-key: $private_key"
-   [ -n "$server" ] && echo "    server: $server"
-   [ -n "$port" ] && echo "    port: $port"
-   [ -n "$address" ] && echo "    ip: $address"
-   [ -n "$mtu" ] && echo "    mtu: $mtu"
-   [ -n "$public_key" ] && echo "    public-key: $public_key"
--
-   echo "    allowed-ips: ['0.0.0.0/0']"
-   [ -n "$psk" ] && echo "    pre-shared-key: $psk"
--
-   echo "    udp: true"
--
-   [ -n "$dns" ] && echo "    dns: [ $dns ]"
-   echo "    remote-dns-resolve: true"
-   awg_params="jc jmin jmax s1 s2 h1 h2 h3 h4 i1 i2 i3 i4 i5 j1 j2 j3 itime"
-@@ -211,7 +212,6 @@
+@@ -289,7 +294,6 @@
  add_provider_block() {
      local name="$1"
      local path="$2"
@@ -47,7 +27,7 @@
      PROVIDERS_BLOCK="${PROVIDERS_BLOCK}  ${name}:
      type: file
      path: ${path}
-@@ -227,8 +227,47 @@
+@@ -305,8 +309,47 @@
  "
  }
  
@@ -95,7 +75,7 @@
  ####
  srv_file="$WORKDIR/srv.yaml"
  if env | grep -qE '^(SRV)[0-9]'; then
-@@ -263,25 +302,22 @@
+@@ -341,25 +384,22 @@
  while IFS='=' read -r name value; do
    case "$name" in
      SUB[0-9]*)
