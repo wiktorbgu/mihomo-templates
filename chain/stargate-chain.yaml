@@ -114,11 +114,19 @@ $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     interval: 200 # Проверять каждые ~3 минуты
 
-  # Ручной выбор — ты сам выбираешь, какой прокси использовать
+  # Ручной выбор — ты сам выбираешь, какой иностранный прокси использовать
   - name: MANUAL
     type: select
     use:
 $PROVIDERS_LIST
+    exclude-filter: "(?i)🇷🇺 |RU"
+
+  # Ручной RU выбор — ты сам выбираешь, какой RU прокси использовать
+  - name: RU_MANUAL
+    type: select
+    use:
+$PROVIDERS_LIST
+    filter: "(?i)🇷🇺 |RU" # Берём ТОЛЬКО российские серверы
 
   # Быстрейший российский прокси
   - name: RU_FASTEST
@@ -147,6 +155,7 @@ $PROVIDERS_LIST
     proxies:
       - FASTEST
       - FAILOVER
+      - MANUAL      
       - DIRECT
     url: $HEALTH_CHECK_URL
     interval: 200
@@ -157,6 +166,7 @@ $PROVIDERS_LIST
     proxies:
       - RU_FASTEST
       - RU_FAILOVER
+      - RU_MANUAL      
       - DIRECT
     url: $HEALTH_CHECK_URL
     interval: 200
@@ -192,11 +202,12 @@ $PROVIDERS_CHAIN_LIST
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Proxy.png
     proxies:
-      - VIA_RU_AUTO # Через Россию в заграницу
-      - AUTO        # Через заграницу
-      - MANUAL      # В ручную
-      - RU_AUTO     # Через Россию
-      - DIRECT      # Напрямую
+      - VIA_RU_AUTO
+      - AUTO      
+      - MANUAL
+      - RU_AUTO
+      - RU_MANUAL
+      - DIRECT
 
   # Глобальный маршрут — почти такой же, но может использоваться в правилах
   - name: GLOBAL
@@ -206,8 +217,9 @@ $PROVIDERS_CHAIN_LIST
     proxies:
       - VIA_RU_AUTO
       - AUTO      
-      - MANUAL      
+      - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   # Специальная группа для QUIC-трафика (обычно блокируется или пропускается как есть)
@@ -223,44 +235,48 @@ $PROVIDERS_CHAIN_LIST
   - name: TELEGRAM
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: WHATSAPP
     type: select
     icon: https://github.com/OMchik33/Whatsapp-icon/blob/master/icons/whatsapp_194x194.png?raw=true
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: STEAM
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Steam.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: YOUTUBE
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
-    include-all: true
+    include-all: false
     proxies:
       - RU_AUTO
       - RU_FASTEST
       - RU_FAILOVER
+      - RU_MANUAL        
       - AUTO
       - FASTEST
       - FAILOVER 
@@ -273,78 +289,85 @@ $PROVIDERS_CHAIN_LIST
   - name: TWITCH
     type: select
     icon: https://img.icons8.com/3d-fluency/94/twitch.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: AI_DEV
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: GOOGLE_GEMINI
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: OPENAI
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: MICROSOFT
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Microsoft.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: ANTHROPIC
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: PERPLEXITY
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: true
+    include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO        
+      - AUTO      
       - MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
 # === ПРАВИЛА: ОТКУДА БРАТЬ СПИСКИ САЙТОВ ===
