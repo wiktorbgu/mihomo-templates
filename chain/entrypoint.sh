@@ -316,11 +316,11 @@ add_http_provider() {
     PROVIDERS_BLOCK="${PROVIDERS_BLOCK}  ${name}:
     type: http
     url: \"${url}\"
-    interval: 86400        # Обновлять раз в сутки
+    interval: 3600
     health-check:
       enable: true
       url: \"${HEALTH_CHECK_URL}\"
-      interval: 86400      # Проверка состояния — тоже раз в сутки
+      interval: 3600
 "
     PROVIDERS_LIST="${PROVIDERS_LIST}      - ${name}
 "
@@ -335,7 +335,7 @@ add_http_chain_provider() {
     PROVIDERS_CHAIN_BLOCK="${PROVIDERS_CHAIN_BLOCK}  ${chain_name}:
     type: http
     url: \"${url}\"
-    interval: 86400
+    interval: 3600
     override:
       dialer-proxy: RU_AUTO            # Сначала идём через RU_AUTO
       exclude-filter: \"(?i)awg|warp\" # Исключаем AWG/WARP — они не поддерживают цепочки
