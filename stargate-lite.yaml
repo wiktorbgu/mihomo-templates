@@ -102,6 +102,8 @@ $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     interval: 300
     lazy: false
+    expected-status: 204
+    tolerance: 10    
 
   # Если самый быстрый прокси упал — пробует остальные по очереди
   - name: FAILOVER
@@ -116,14 +118,14 @@ $PROVIDERS_LIST
     type: select
     use:
 $PROVIDERS_LIST
-    exclude-filter: "(?i)🇷🇺 |RU"
+    exclude-filter: "(?i)🇷🇺|RU"
 
   # Ручной RU выбор — ты сам выбираешь, какой RU прокси использовать
   - name: RU_MANUAL
     type: select
     use:
 $PROVIDERS_LIST
-    filter: "(?i)🇷🇺 |RU" # Берём ТОЛЬКО российские серверы
+    filter: "(?i)🇷🇺|RU" # Берём ТОЛЬКО российские серверы
 
   # То же самое, но только для российских прокси (если они есть в подписке)
   - name: RU_AUTO
@@ -134,7 +136,7 @@ $PROVIDERS_LIST
       - RU_MANUAL      
       - DIRECT
     url: $HEALTH_CHECK_URL
-    filter: '(?i)🇷🇺 |RU'   # Ищет прокси с флагом 🇷🇺 или надписью "RU"
+    filter: '(?i)🇷🇺|RU'   # Ищет прокси с флагом 🇷🇺или надписью "RU"
     interval: 200
 
   - name: RU_FASTEST
@@ -142,16 +144,18 @@ $PROVIDERS_LIST
     use:
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
-    filter: '(?i)🇷🇺 |RU'
+    filter: '(?i)🇷🇺|RU'
     interval: 300
     lazy: false
+    expected-status: 204
+    tolerance: 10    
 
   - name: RU_FAILOVER
     type: fallback
     use:
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
-    filter: '(?i)🇷🇺 |RU'
+    filter: '(?i)🇷🇺|RU'
     interval: 200
 
   # Объединяет все основные варианты в одном месте
