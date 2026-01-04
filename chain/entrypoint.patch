@@ -1,5 +1,5 @@
 --- ./original/entrypoint.sh	2025-12-17 22:07:09.000000000 +0300
-+++ ./entrypoint.sh	2026-01-01 10:26:16.993235883 +0300
++++ ./entrypoint.sh	2026-01-04 17:10:12.254017720 +0300
 @@ -39,6 +39,10 @@
    fi
  fi
@@ -19,15 +19,7 @@
  
  proxy-groups:
    - name: SELECTOR
-@@ -289,7 +294,6 @@
- add_provider_block() {
-     local name="$1"
-     local path="$2"
--
-     PROVIDERS_BLOCK="${PROVIDERS_BLOCK}  ${name}:
-     type: file
-     path: ${path}
-@@ -305,8 +309,47 @@
+@@ -305,8 +310,48 @@
  "
  }
  
@@ -59,8 +51,9 @@
 +    url: \"${url}\"
 +    interval: 3600
 +    override:
-+      dialer-proxy: RU_AUTO            # Сначала идём через RU_AUTO
-+      exclude-filter: \"(?i)awg|warp|🇷🇺 |RU\" # Исключаем AWG/WARP — они не поддерживают цепочки + RU чтобы не ходить петлями
++      dialer-proxy: RU_AUTO         # Сначала идём через RU_AUTO
++      exclude-filter: \"(?i)🇷🇺|RU\" # Исключаем RU чтобы не ходить петлями
++      exclude-type: wireguard       # Исключаем AWG/WARP — они не поддерживают цепочки
 +"
 +    PROVIDERS_CHAIN_LIST="${PROVIDERS_CHAIN_LIST}      - ${chain_name}
 +"
@@ -75,7 +68,7 @@
  ####
  srv_file="$WORKDIR/srv.yaml"
  if env | grep -qE '^(SRV)[0-9]'; then
-@@ -341,25 +384,22 @@
+@@ -341,25 +386,22 @@
  while IFS='=' read -r name value; do
    case "$name" in
      SUB[0-9]*)

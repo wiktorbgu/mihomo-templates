@@ -294,6 +294,7 @@ read_cfg() {
 add_provider_block() {
     local name="$1"
     local path="$2"
+
     PROVIDERS_BLOCK="${PROVIDERS_BLOCK}  ${name}:
     type: file
     path: ${path}
@@ -337,8 +338,9 @@ add_http_chain_provider() {
     url: \"${url}\"
     interval: 3600
     override:
-      dialer-proxy: RU_AUTO            # Сначала идём через RU_AUTO
-      exclude-filter: \"(?i)awg|warp|🇷🇺 |RU\" # Исключаем AWG/WARP — они не поддерживают цепочки + RU чтобы не ходить петлями
+      dialer-proxy: RU_AUTO         # Сначала идём через RU_AUTO
+      exclude-filter: \"(?i)🇷🇺|RU\" # Исключаем RU чтобы не ходить петлями
+      exclude-type: wireguard       # Исключаем AWG/WARP — они не поддерживают цепочки
 "
     PROVIDERS_CHAIN_LIST="${PROVIDERS_CHAIN_LIST}      - ${chain_name}
 "
