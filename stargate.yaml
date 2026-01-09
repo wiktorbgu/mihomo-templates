@@ -117,8 +117,9 @@ $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     interval: 300
     lazy: false
-    expected-status: 204
-    tolerance: 10    
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
+    exclude-filter: "(?i)🇷🇺|RU"    
+    tolerance: 50    
 
   # Если самый быстрый прокси упал — пробует остальные по очереди
   - name: FAILOVER
@@ -126,6 +127,7 @@ $PROVIDERS_LIST
     use:
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
+    exclude-filter: "(?i)🇷🇺|RU"    
     interval: 200
 
   # Ручной выбор иностранного прокси — из списка подписки
@@ -162,8 +164,8 @@ $PROVIDERS_LIST
     filter: '(?i)🇷🇺|RU'
     interval: 300
     lazy: false
-    expected-status: 204
-    tolerance: 10    
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
+    tolerance: 50    
 
   - name: RU_FAILOVER
     type: fallback

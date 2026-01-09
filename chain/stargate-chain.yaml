@@ -104,7 +104,7 @@ $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     interval: 300 # Проверять каждые 5 минут
     lazy: false # Проверять сразу при запуске
-    expected-status: 204
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     tolerance: 50
     exclude-type: wireguard
 
@@ -116,7 +116,7 @@ $PROVIDERS_LIST
     exclude-filter: "(?i)🇷🇺|RU"
     url: $HEALTH_CHECK_URL
     interval: 200 # Проверять каждые ~3 минуты
-    expected-status: 204
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     exclude-type: wireguard
 
   # Ручной выбор — ты сам выбираешь, какой иностранный прокси использовать
@@ -142,7 +142,7 @@ $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     interval: 300
     lazy: false
-    expected-status: 204
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     tolerance: 50
     exclude-type: wireguard    
 
@@ -154,7 +154,7 @@ $PROVIDERS_LIST
     filter: "(?i)🇷🇺|RU"
     url: $HEALTH_CHECK_URL
     interval: 200
-    expected-status: 204
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     exclude-type: wireguard        
 
   # Автоматика для иностранных серверов: сначала FASTEST, потом FAILOVER, иначе напрямую
@@ -167,7 +167,7 @@ $PROVIDERS_LIST
       - DIRECT
     url: $HEALTH_CHECK_URL
     interval: 200
-    expected-status: 204    
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS    
 
   # Автоматика для российских серверов
   - name: RU_AUTO
@@ -179,7 +179,7 @@ $PROVIDERS_LIST
       - DIRECT
     url: $HEALTH_CHECK_URL
     interval: 200
-    expected-status: 204    
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
 
   # В заграницу через Россию: использует цепочки
   - name: VIA_RU_AUTO
@@ -190,7 +190,7 @@ $PROVIDERS_LIST
       - AUTO # Если через Россию не получится, то просто иностранные
     url: $HEALTH_CHECK_URL
     interval: 200
-    expected-status: 204    
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS    
 
   - name: VIA_RU_FASTEST
     type: url-test
@@ -199,7 +199,7 @@ $PROVIDERS_CHAIN_LIST
     exclude-filter: "(?i)🇷🇺|RU"
     url: $HEALTH_CHECK_URL
     interval: 300
-    expected-status: 204
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     tolerance: 50
     exclude-type: wireguard        
 
@@ -210,7 +210,7 @@ $PROVIDERS_CHAIN_LIST
     exclude-filter: "🇷🇺|RU"
     url: $HEALTH_CHECK_URL
     interval: 200
-    expected-status: 204
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     exclude-type: wireguard    
 
   # Главный переключатель — его видно в панели управления
