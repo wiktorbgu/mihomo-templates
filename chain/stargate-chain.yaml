@@ -414,6 +414,14 @@ rule-providers:
     path: ./rule-sets/whatsapp-domain.mrs
     interval: 86400
 
+  whatsapp-ips:
+    type: http
+    behavior: ipcidr
+    format: yaml
+    url: https://github.com/OMchik33/custom-rules/blob/main/mihomo/whatsapp-ips.yaml
+    path: ./rule-sets/whatsapp-ips.yaml
+    interval: 86400   
+
   steam-domain:
     type: http
     behavior: domain
@@ -587,7 +595,7 @@ rules:
   # Правила для конкретных сервисов:
   - RULE-SET,mixed-ai,AI_DEV
   - OR,((RULE-SET,telegram-domain),(RULE-SET,telegram-ips)),TELEGRAM
-  - RULE-SET,whatsapp-domain,WHATSAPP
+  - OR,((RULE-SET,whatsapp-domain),(RULE-SET,whatsapp-ips),WHATSAPP
   - OR,((RULE-SET,discord_domains),(RULE-SET,discord_voiceips)),SELECTOR
   - OR,((RULE-SET,steam-domain),(RULE-SET,steam-ips)),STEAM
   - RULE-SET,anthropic,ANTHROPIC
