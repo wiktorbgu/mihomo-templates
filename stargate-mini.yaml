@@ -267,34 +267,6 @@ $PROVIDERS_LIST
       - RU_MANUAL
       - DIRECT
 
-  - name: Discord
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Discord.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: Steam
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Steam.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
   - name: YouTube
     type: select
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
@@ -309,103 +281,6 @@ $PROVIDERS_LIST
       - MANUAL
       - DIRECT
 
-  - name: Twitch
-    type: select
-    icon: https://img.icons8.com/3d-fluency/94/twitch.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: AI & Разработка
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: GoogleGemini
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: OpenAI
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: Microsoft
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Microsoft.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: Anthropic
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
-
-  - name: Perplexity
-    type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Bot.png
-    include-all: false
-    proxies:
-      - SELECTOR
-      - AUTO
-      - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
-      - DIRECT
 
 # === ПРАВИЛА ИЗ ВНЕШНИХ ИСТОЧНИКОВ ===
 # Эти правила подгружаются из интернета и обновляются раз в сутки
@@ -442,30 +317,6 @@ rule-providers:
     path: ./rule-sets/whatsapp-ips.yaml
     interval: 86400
 
-  steam-domain:
-    type: http
-    behavior: domain
-    format: yaml
-    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/gaming-domains.yaml
-    path: ./rule-sets/steam-domain.yaml
-    interval: 86400
-
-  steam-ips:
-    type: http
-    behavior: ipcidr
-    format: yaml
-    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/gaming-ips.yaml
-    path: ./rule-sets/steam-ips.yaml
-    interval: 86400
-
-  twitch-domain:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/twitch.mrs
-    path: ./rule-sets/twitch-domain.mrs
-    interval: 86400
-
   cf-domains:
     type: http
     behavior: domain
@@ -480,62 +331,6 @@ rule-providers:
     format: mrs
     url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/cloudflare.mrs
     path: ./rule-sets/cf-ips.mrs
-    interval: 86400
-
-  discord_domains:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/discord.mrs
-    path: ./rule-sets/discord_domains.mrs
-    interval: 86400
-
-  discord_voiceips:
-    type: http
-    behavior: ipcidr
-    format: mrs
-    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/other/discord-voice-ip-list.mrs
-    path: ./rule-sets/discord_voiceips.mrs
-    interval: 86400
-
-  google_gemini:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/google-gemini.mrs
-    path: ./rule-sets/google-gemini.mrs
-    interval: 86400
-
-  openai:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/openai.mrs
-    path: ./rule-sets/openai.mrs
-    interval: 86400
-
-  microsoft:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/microsoft.mrs
-    path: ./rule-sets/microsoft.mrs
-    interval: 86400
-
-  anthropic:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/anthropic.mrs
-    path: ./rule-sets/anthropic.mrs
-    interval: 86400
-
-  perplexity:
-    type: http
-    behavior: domain
-    format: mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/perplexity.mrs
-    path: ./rule-sets/perplexity.mrs
     interval: 86400
 
   youtube:
@@ -563,54 +358,6 @@ rule-providers:
 #    path: ./ru-bundle/rule.mrs
 #    interval: 86400
 
-  # Список доменов для ИИ и разработки, заданный прямо здесь
-  mixed-ai:
-    type: inline
-    behavior: classical
-    format: text
-    payload:
-      # xAI (Grok)
-      - DOMAIN-SUFFIX,x.ai
-      - DOMAIN-SUFFIX,grok.x.ai
-      - DOMAIN-SUFFIX,api.x.ai
-      - DOMAIN-KEYWORD,grok
-
-      # Hugging Face
-      - DOMAIN-SUFFIX,huggingface.co
-      - DOMAIN-SUFFIX,hf.co
-      - DOMAIN-SUFFIX,hf.space
-      - DOMAIN-SUFFIX,huggingface.com
-      - DOMAIN-KEYWORD,huggingface
-
-      # Midjourney и другие ИИ для изображений
-      - DOMAIN-SUFFIX,midjourney.com
-      - DOMAIN-SUFFIX,cdn.midjourney.com
-      - DOMAIN-KEYWORD,midjourney
-      - DOMAIN-SUFFIX,stability.ai
-      - DOMAIN-SUFFIX,stablediffusionweb.com
-      - DOMAIN-SUFFIX,dreamstudio.ai
-      - DOMAIN-SUFFIX,runwayml.com
-      - DOMAIN-SUFFIX,runway.ml
-
-      # Character.AI и другие
-      - DOMAIN-SUFFIX,character.ai
-      - DOMAIN-SUFFIX,beta.character.ai
-      - DOMAIN-SUFFIX,replicate.com
-      - DOMAIN-SUFFIX,cohere.ai
-      - DOMAIN-SUFFIX,cohere.com
-
-      # Инструменты для программистов
-      - DOMAIN-SUFFIX,jetbrains.com
-      - DOMAIN-SUFFIX,replit.com
-      - DOMAIN-SUFFIX,repl.it
-      - DOMAIN-SUFFIX,stackoverflow.com
-      - DOMAIN-SUFFIX,docker.com
-      - DOMAIN-SUFFIX,docker.io
-      - DOMAIN-SUFFIX,dockerstatic.com
-      - DOMAIN-SUFFIX,compose-spec.io            
-      - DOMAIN-SUFFIX,npmjs.com
-      - DOMAIN-SUFFIX,pypi.org
-
 # === ПРАВИЛА МАРШРУТИЗАЦИИ ===
 # Правила читаются сверху вниз: первое подходящее — срабатывает
 rules:
@@ -630,17 +377,8 @@ rules:
   - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
 
   # Правила для конкретных сервисов
-  - RULE-SET,mixed-ai,AI & Разработка
   - OR,((RULE-SET,telegram-domain),(RULE-SET,telegram-ips)),Telegram
   - OR,((RULE-SET,whatsapp-domain),(RULE-SET,whatsapp-ips)),WhatsApp
-  - OR,((RULE-SET,discord_domains),(RULE-SET,discord_voiceips)),Discord
-  - OR,((RULE-SET,steam-domain),(RULE-SET,steam-ips)),Steam
-  - RULE-SET,anthropic,Anthropic
-  - RULE-SET,perplexity,Perplexity
-  - RULE-SET,google_gemini,GoogleGemini
-  - RULE-SET,openai,OpenAI
-  - RULE-SET,microsoft,Microsoft
-  - RULE-SET,twitch-domain,Twitch
   - RULE-SET,youtube,YouTube
   - OR,((RULE-SET,cf-domains),(RULE-SET,cf-ips)),Cloudflare  
   #- RULE-SET,ru-bundle,SELECTOR

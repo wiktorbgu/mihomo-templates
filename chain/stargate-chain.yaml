@@ -93,6 +93,22 @@ $PROVIDERS_CHAIN_BLOCK
 # === ГРУППЫ ПРОКСИ (ГЛАВНОЕ МЕНЮ ТРАФИКА) ===
 # Группы — это как "папки" с прокси. Некоторые выбирают сами, другие — работают автоматически.
 proxy-groups:
+
+  # Главный переключатель — его видно в панели управления
+  - name: SELECTOR
+    type: select
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Proxy.png
+    include-all: true # Иногда требуется
+    proxies:
+      - VIA_RU_AUTO
+      - AUTO
+      - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
+      - RU_AUTO
+      - RU_MANUAL
+      - DIRECT
+
   # Быстрейший иностранный прокси (автоматически проверяет скорость)
   - name: FASTEST
     type: url-test
@@ -144,7 +160,7 @@ $PROVIDERS_LIST
     lazy: false
     expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     tolerance: 50
-    exclude-type: wireguard    
+    exclude-type: wireguard
 
   # Надёжный российский прокси
   - name: RU_FAILOVER
@@ -155,7 +171,7 @@ $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     interval: 200
     expected-status: $HEALTH_CHECK_EXPECTED_STATUS
-    exclude-type: wireguard        
+    exclude-type: wireguard
 
   # Автоматика для иностранных серверов: сначала FASTEST, потом FAILOVER, иначе напрямую
   - name: AUTO
@@ -163,7 +179,7 @@ $PROVIDERS_LIST
     proxies:
       - FASTEST
       - FAILOVER
-      - MANUAL      
+      - MANUAL
       - DIRECT
     url: $HEALTH_CHECK_URL
     interval: 200
@@ -175,7 +191,7 @@ $PROVIDERS_LIST
     proxies:
       - RU_FASTEST
       - RU_FAILOVER
-      - RU_MANUAL      
+      - RU_MANUAL
       - DIRECT
     url: $HEALTH_CHECK_URL
     interval: 200
@@ -201,7 +217,7 @@ $PROVIDERS_CHAIN_LIST
     interval: 300
     expected-status: $HEALTH_CHECK_EXPECTED_STATUS
     tolerance: 50
-    exclude-type: wireguard        
+    exclude-type: wireguard
 
   - name: VIA_RU_FAILOVER
     type: fallback
@@ -211,20 +227,45 @@ $PROVIDERS_CHAIN_LIST
     url: $HEALTH_CHECK_URL
     interval: 200
     expected-status: $HEALTH_CHECK_EXPECTED_STATUS
-    exclude-type: wireguard    
+    exclude-type: wireguard
 
-  # Главный переключатель — его видно в панели управления
-  - name: SELECTOR
+  # Ручной AWG выбор — ты сам выбираешь, какой AWG прокси использовать
+  - name: AWG_MANUAL
     type: select
-    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Dark/Proxy.png
-    include-all: true # Иногда требуется
+    use:
+$PROVIDERS_LIST
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+
+  # То же самое, но только для AWG прокси
+  - name: AWG_AUTO
+    type: fallback
     proxies:
-      - VIA_RU_AUTO
-      - AUTO      
-      - MANUAL
-      - RU_AUTO
-      - RU_MANUAL
+      - AWG_FASTEST
+      - AWG_FAILOVER
+      - AWG_MANUAL
       - DIRECT
+    url: $HEALTH_CHECK_URL
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    interval: 200
+
+  - name: AWG_FASTEST
+    type: url-test
+    use:
+$PROVIDERS_LIST
+    url: $HEALTH_CHECK_URL
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    interval: 300
+    lazy: false
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
+    tolerance: 30
+
+  - name: AWG_FAILOVER
+    type: fallback
+    use:
+$PROVIDERS_LIST
+    url: $HEALTH_CHECK_URL
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    interval: 200
 
   # Глобальный маршрут — может использоваться в правилах, включите если нужно
   - name: GLOBAL
@@ -233,8 +274,10 @@ $PROVIDERS_CHAIN_LIST
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -255,8 +298,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -267,8 +312,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -279,8 +326,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -291,8 +340,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -303,8 +354,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -317,7 +370,11 @@ $PROVIDERS_CHAIN_LIST
       - RU_AUTO
       - RU_FASTEST
       - RU_FAILOVER
-      - RU_MANUAL        
+      - RU_MANUAL
+      - AWG_AUTO
+      - AWG_FASTEST
+      - AWG_FAILOVER
+      - AWG_MANUAL     
       - AUTO
       - FASTEST
       - FAILOVER 
@@ -333,8 +390,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -345,8 +404,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -357,8 +418,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -369,8 +432,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -381,8 +446,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -393,8 +460,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT
@@ -405,8 +474,10 @@ $PROVIDERS_CHAIN_LIST
     include-all: false
     proxies:
       - VIA_RU_AUTO
-      - AUTO      
+      - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL      
       - RU_AUTO
       - RU_MANUAL
       - DIRECT

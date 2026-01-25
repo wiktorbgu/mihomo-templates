@@ -92,6 +92,8 @@ proxy-groups:
     proxies:
       - AUTO      # Всё само настраивается
       - MANUAL    # Сам выбираю прокси
+      - AWG_AUTO   # Автоматически выбирает AWG прокси
+      - AWG_MANUAL # Сам выбираю AWG прокси
       - RU_AUTO   # Автоматически выбирает российские прокси
       - RU_MANUAL # Сам выбираю российские прокси
       - DIRECT    # Иду напрямую, без прокси
@@ -128,7 +130,7 @@ $PROVIDERS_LIST
     use:
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
-    exclude-filter: "(?i)🇷🇺|RU"    
+    exclude-filter: "(?i)🇷🇺|RU"
     interval: 200
 
   # Ручной выбор иностранного прокси — из списка подписки
@@ -166,7 +168,7 @@ $PROVIDERS_LIST
     interval: 300
     lazy: false
     expected-status: $HEALTH_CHECK_EXPECTED_STATUS
-    tolerance: 50    
+    tolerance: 50
 
   - name: RU_FAILOVER
     type: fallback
@@ -174,6 +176,44 @@ $PROVIDERS_LIST
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
     filter: "(?i)🇷🇺|RU"
+    interval: 200
+
+  # Ручной AWG выбор — ты сам выбираешь, какой AWG прокси использовать
+  - name: AWG_MANUAL
+    type: select
+    use:
+$PROVIDERS_LIST
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+
+  # То же самое, но только для AWG прокси
+  - name: AWG_AUTO
+    type: fallback
+    proxies:
+      - AWG_FASTEST
+      - AWG_FAILOVER
+      - AWG_MANUAL
+      - DIRECT
+    url: $HEALTH_CHECK_URL
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    interval: 200
+
+  - name: AWG_FASTEST
+    type: url-test
+    use:
+$PROVIDERS_LIST
+    url: $HEALTH_CHECK_URL
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    interval: 300
+    lazy: false
+    expected-status: $HEALTH_CHECK_EXPECTED_STATUS
+    tolerance: 30
+
+  - name: AWG_FAILOVER
+    type: fallback
+    use:
+$PROVIDERS_LIST
+    url: $HEALTH_CHECK_URL
+    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
     interval: 200
 
   # Глобальный маршрут — может использоваться в правилах, включите если нужно
@@ -184,7 +224,10 @@ $PROVIDERS_LIST
     proxies:
       - AUTO
       - MANUAL
+      - AWG_AUTO
+      - AWG_MANUAL
       - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   # Специальная группа для обработки QUIC-трафика
@@ -215,8 +258,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: WhatsApp
@@ -227,8 +272,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Ru-Traffic
@@ -237,10 +284,12 @@ $PROVIDERS_LIST
     include-all: false
     proxies:
       - SELECTOR
+      - RU_AUTO
+      - RU_MANUAL      
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
       - DIRECT
 
   - name: ECH-Refilter
@@ -251,8 +300,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: META
@@ -263,8 +314,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: AMAZON
@@ -275,8 +328,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: FASTLY
@@ -287,8 +342,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: AKAMAI
@@ -299,8 +356,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: GOOGLE
@@ -311,8 +370,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: CLOUDFLARE
@@ -323,8 +384,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: CDN77
@@ -335,8 +398,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: DIGITALOCEAN
@@ -347,8 +412,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: HETZNER
@@ -359,8 +426,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: MEGA
@@ -371,8 +440,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: ORACLE
@@ -383,8 +454,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: OVH
@@ -395,8 +468,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: VULTR
@@ -407,8 +482,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Steam
@@ -419,8 +496,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Discord
@@ -431,8 +510,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: YouTube
@@ -440,9 +521,11 @@ $PROVIDERS_LIST
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
     include-all: false
     proxies:
-      - RU_AUTO      
+      - RU_AUTO
       - RU_MANUAL
-      - SELECTOR     
+      - SELECTOR        
+      - AWG_AUTO
+      - AWG_MANUAL
       - AUTO
       - MANUAL
       - DIRECT
@@ -455,8 +538,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: AI & Разработка
@@ -467,8 +552,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: GoogleGemini
@@ -479,8 +566,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: OpenAI
@@ -491,8 +580,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Microsoft
@@ -503,8 +594,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Anthropic
@@ -515,8 +608,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Perplexity
@@ -527,8 +622,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Torrent-Traffic
@@ -539,8 +636,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Politic-Domains
@@ -551,8 +650,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
   - name: Other-Domains
@@ -563,8 +664,10 @@ $PROVIDERS_LIST
       - SELECTOR
       - AUTO
       - MANUAL
-      - RU_AUTO      
-      - RU_MANUAL      
+      - AWG_AUTO
+      - AWG_MANUAL
+      - RU_AUTO
+      - RU_MANUAL
       - DIRECT
 
 # === ВНЕШНИЕ НАБОРЫ ПРАВИЛ ===
@@ -600,7 +703,7 @@ rule-providers:
     format: yaml
     url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/whatsapp-ips.yaml
     path: ./rule-sets/whatsapp-ips.yaml
-    interval: 86400   
+    interval: 86400
 
   steam-domain:
     type: http
@@ -795,7 +898,7 @@ rule-providers:
       # Hugging Face
       - DOMAIN-SUFFIX,huggingface.co
       - DOMAIN-SUFFIX,hf.co
-      - DOMAIN-SUFFIX,hf.space      
+      - DOMAIN-SUFFIX,hf.space
       - DOMAIN-SUFFIX,huggingface.com
       - DOMAIN-KEYWORD,huggingface
 
