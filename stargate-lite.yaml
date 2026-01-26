@@ -564,7 +564,7 @@ rule-providers:
 #    interval: 86400
 
   # Список доменов для ИИ и разработки, заданный прямо здесь
-  mixed-ai:
+  misc-ai:
     type: inline
     behavior: classical
     format: text
@@ -630,7 +630,7 @@ rules:
   - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
 
   # Правила для конкретных сервисов
-  - RULE-SET,mixed-ai,AI & Разработка
+  - RULE-SET,misc-ai,AI & Разработка
   - OR,((RULE-SET,telegram-domains),(RULE-SET,telegram-ips)),Telegram
   - OR,((RULE-SET,whatsapp-domains),(RULE-SET,whatsapp-ips)),WhatsApp
   - OR,((RULE-SET,discord-domains),(RULE-SET,discord-voiceips)),Discord
