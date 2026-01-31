@@ -183,7 +183,7 @@ $PROVIDERS_LIST
     type: select
     use:
 $PROVIDERS_LIST
-    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    exclude-type: "ss|shadowsocks|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
 
   # То же самое, но только для AWG прокси
   - name: AWG_AUTO
@@ -194,7 +194,7 @@ $PROVIDERS_LIST
       - AWG_MANUAL
       - DIRECT
     url: $HEALTH_CHECK_URL
-    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    exclude-type: "ss|shadowsocks|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
     interval: 200
 
   - name: AWG_FASTEST
@@ -202,7 +202,7 @@ $PROVIDERS_LIST
     use:
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
-    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    exclude-type: "ss|shadowsocks|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
     interval: 300
     lazy: false
     expected-status: $HEALTH_CHECK_EXPECTED_STATUS
@@ -213,7 +213,7 @@ $PROVIDERS_LIST
     use:
 $PROVIDERS_LIST
     url: $HEALTH_CHECK_URL
-    exclude-type: "ss|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
+    exclude-type: "ss|shadowsocks|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
     interval: 200
 
   # Глобальный маршрут — может использоваться в правилах, включите если нужно
