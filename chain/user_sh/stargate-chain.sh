@@ -74,13 +74,17 @@ done << EOF
 $(env)
 EOF
 
-# Восстановим оригинальные srv/awg, если они были сгенерированы ранее основным entrypoint.sh
+# Восстановим оригинальные srv/awg/veth, если они были сгенерированы ранее основным entrypoint.sh
 if [ -f "$awg_file" ]; then
 add_provider "AWG" "file" "$awg_file"
 fi
 
 if [ -f "$srv_file" ]; then
 add_provider "SRV" "file" "$srv_file"
+fi
+
+if [ -f "$veth_file" ]; then
+add_provider "VETH" "file" "$veth_file"
 fi
 
 # Экспортируем свои переменные для использования в stargate-chain.yaml, остальные переменные экспортируются внутри entrypoint.sh
