@@ -835,10 +835,16 @@ rule-providers:
 rules:
     # Локальная сеть — всегда напрямую (без прокси)
     # Эти правила имеют высший приоритет для безопасности и производительности
-  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve    # Частная сеть Class C
-  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve    # Частная сеть Class A
-  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve    # Частная сеть Class B
-  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve    # Loopback (localhost)
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve    # Частная сеть Class A, RFC1918
+  - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve   # Сеть оператора RFC6598
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve    # Loopback (localhost), RFC1700
+  - IP-CIDR,169.254.0.0/16,DIRECT,no-resolve    # Link local, RFC3330
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve    # Частная сеть Class B, RFC1918
+  - IP-CIDR,192.88.99.0/24,DIRECT,no-resolve    # Anycast 6to4, RFC3068
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve    # Частная сеть Class C, RFC1918
+  - IP-CIDR,224.0.0.0/4,DIRECT,no-resolve    # Multicast, RFC3171
+  - DOMAIN-SUFFIX,local,DIRECT    # Локальный префикс
+  - DOMAIN-SUFFIX,lan,DIRECT    # Локальный префикс
 
     # Безопасность: блокировка уязвимых UDP портов
     #  - AND,((NETWORK,udp),(DST-PORT,135)),REJECT

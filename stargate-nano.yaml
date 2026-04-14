@@ -1,6 +1,6 @@
 # ============================================================================
-# ШАБЛОН STARGATE-MINI
-# Облегчённая конфигурация Mihomo/Meta для минималистичного использования
+# ШАБЛОН STARGATE-NANO
+# Облегчённая конфигурация Mihomo/Meta без сервисов
 # Подходит для устройств с ограниченными ресурсами (роутеры, Raspberry Pi)
 # Документация: https://github.com/MetaCubeX/mihomo/blob/Meta/docs/config.yaml
 # ============================================================================
@@ -24,9 +24,6 @@ mode: rule
 # Доступные значения: silent (тихо), error (ошибки), warning (предупреждения),
 # info (информация), debug (отладка - максимальная детализация)
 log-level: $LOG_LEVEL
-
-# Включить поддержку IPv6
-ipv6: $IPV6
 
 # Делать задержки более естественными (чтобы не выдавать автоматизацию)
 # Улучшает точность тестирования скорости прокси-серверов
@@ -52,26 +49,6 @@ secret: $UI_SECRET
 
 profile:
   store-selected: true # Сохранение выбора API для групп политик (селекторы в веб-панели) для использования при следующем запуске
-
-# ============================================================================
-# === АНАЛИЗ ТРАФИКА (SNIFFER) ===
-# ============================================================================
-
-# Функция "подслушивания" трафика для определения доменных имён
-# Позволяет корректно маршрутизировать трафик даже при подключении по IP-адресу
-# Критически важно для работы правил на основе доменных имён
-sniffer:
-  enable: true    # Включить сниффер
-  parse-pure-ip: true    # Анализировать IP-адреса без домена
-  force-dns-mapping: true    # Принудительно использовать DNS-маппинг
-  sniff:    # Настройки для различных протоколов
-    HTTP:
-      ports: [80, 8080-8880]    # Порты для HTTP-трафика
-      override-destination: true    # Подменять получателя трафика на домен
-    TLS:
-      ports: [443, 8443]    # Порты для HTTPS/TLS-трафика
-    QUIC:
-      ports: [443, 8443]    # Порты для QUIC-протокола (UDP/443)
 
 # ============================================================================
 # === DNS НАСТРОЙКИ ===
@@ -166,33 +143,7 @@ proxy_list_all: &proxy_list_all
   - SELECTOR
   - AUTO
   - MANUAL
-  - AWG_AUTO
-  - AWG_MANUAL
-  - RU_AUTO
-  - RU_MANUAL
   - DIRECT
-
-# Специальный список для YouTube (с приоритетом российских прокси)
-# Оптимизирован для работы с YouTube через российские серверы
-proxy_list_youtube: &proxy_list_youtube
-  - RU_AUTO
-  - RU_MANUAL
-  - SELECTOR
-  - AWG_AUTO
-  - AWG_MANUAL
-  - AUTO
-  - MANUAL
-  - DIRECT
-
-# ============================================================================
-# === ИКОНКИ (ОТДЕЛЬНЫЕ ЯКОРЯ ДЛЯ КАЖДОЙ) ===
-# ============================================================================
-
-icon_telegram: &icon_telegram https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
-icon_whatsapp: &icon_whatsapp https://github.com/OMchik33/Whatsapp-icon/blob/master/icons/whatsapp_194x194.png?raw=true
-icon_cloudflare: &icon_cloudflare https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cloudflare.png
-icon_youtube: &icon_youtube https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
-icon_global: &icon_global https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png
 
 # ============================================================================
 # === БАЗОВЫЕ ШАБЛОНЫ ПРАВИЛ (RULE PROVIDER BASES) ===
@@ -235,10 +186,6 @@ proxy-groups:
     proxies:
       - AUTO
       - MANUAL
-      - AWG_AUTO
-      - AWG_MANUAL
-      - RU_AUTO
-      - RU_MANUAL
       - DIRECT
 
     # --------------------------------------------------------------------------
@@ -277,183 +224,17 @@ proxy-groups:
     exclude-filter: *exclude_ru    # Исключить российские серверы
 
     # --------------------------------------------------------------------------
-    # РОССИЙСКИЕ ПРОКСИ-ГРУППЫ
-    # --------------------------------------------------------------------------
-
-    # RU_AUTO — полностью автоматический выбор (российские)
-    # Приоритет: RU_FASTEST → RU_FAILOVER → RU_MANUAL → DIRECT
-  - name: RU_AUTO
-    type: fallback    # Переключение при отказе
-    proxies:
-      - RU_FASTEST
-      - RU_FAILOVER
-      - RU_MANUAL
-      - DIRECT
-    filter: *filter_ru    # Только российские серверы
-    <<: *health_check    # Параметры проверки
-
-    # RU_MANUAL — ручной выбор российского прокси
-  - name: RU_MANUAL
-    type: select    # Ручной выбор
-    use: *providers_list    # Использовать провайдеры
-    filter: *filter_ru    # Только российские серверы
-
-    # RU_FASTEST — самый быстрый российский прокси
-  - name: RU_FASTEST
-    type: url-test    # Тестирование скорости
-    use: *providers_list    # Использовать провайдеры
-    filter: *filter_ru    # Только российские серверы
-    <<: *url_test    # Параметры тестирования
-
-    # RU_FAILOVER — резервный российский прокси
-  - name: RU_FAILOVER
-    type: fallback    # Переключение при отказе
-    use: *providers_list    # Использовать провайдеры
-    filter: *filter_ru    # Только российские серверы
-    <<: *health_check    # Параметры проверки
-
-    # --------------------------------------------------------------------------
-    # AMNEZIA/WIREGUARD ГРУППЫ
-    # --------------------------------------------------------------------------
-
-    # AWG_AUTO — автоматический выбор AWG-прокси
-    # Приоритет: AWG_FASTEST → AWG_FAILOVER → AWG_MANUAL → DIRECT
-  - name: AWG_AUTO
-    type: fallback    # Переключение при отказе
-    proxies:
-      - AWG_FASTEST
-      - AWG_FAILOVER
-      - AWG_MANUAL
-      - DIRECT
-    exclude-type: *exclude_awg    # Только AWG-протоколы
-    <<: *health_check    # Параметры проверки
-
-    # AWG_MANUAL — ручной выбор AWG-прокси
-  - name: AWG_MANUAL
-    type: select    # Ручной выбор
-    use: *providers_list    # Использовать провайдеры
-    exclude-type: *exclude_awg    # Только AWG-протоколы
-
-    # AWG_FASTEST — самый быстрый AWG-прокси
-  - name: AWG_FASTEST
-    type: url-test    # Тестирование скорости
-    use: *providers_list    # Использовать провайдеры
-    exclude-type: *exclude_awg    # Только AWG-протоколы
-    <<: *url_test_awg    # Параметры тестирования (tolerance: 30)
-
-    # AWG_FAILOVER — резервный AWG-прокси
-  - name: AWG_FAILOVER
-    type: fallback    # Переключение при отказе
-    use: *providers_list    # Использовать провайдеры
-    exclude-type: *exclude_awg    # Только AWG-протоколы
-    <<: *health_check    # Параметры проверки
 
     # --------------------------------------------------------------------------
     # СИСТЕМНЫЕ ГРУППЫ
     # --------------------------------------------------------------------------
 
-    # GLOBAL — скрытая глобальная группа для правил
+    # GLOBAL — глобальная группа для правил
   - name: GLOBAL
     type: select    # Ручной выбор
-    hidden: true    # Скрыть из интерфейса
-    icon: *icon_global    # Иконка группы
     proxies: *proxy_list_all    # Список доступных опций
 
-    # QUIC — обработка QUIC-трафика (UDP/443)
-  - name: QUIC
-    type: select    # Ручной выбор
-    proxies:
-      - PASS    # Пропустить без изменений
-      - REJECT    # Заблокировать
 
-    # --------------------------------------------------------------------------
-    # ГРУППЫ ПО ПРИЛОЖЕНИЯМ/СЕРВИСАМ
-    # --------------------------------------------------------------------------
-
-    # TELEGRAM — мессенджер Telegram
-  - name: Telegram
-    type: select    # Ручной выбор
-    icon: *icon_telegram    # Иконка Telegram
-    include-all: false    # Только указанные прокси
-    proxies: *proxy_list_all    # Список доступных опций
-
-    # WHATSAPP — мессенджер WhatsApp
-  - name: WhatsApp
-    type: select    # Ручной выбор
-    icon: *icon_whatsapp    # Иконка WhatsApp
-    include-all: false    # Только указанные прокси
-    proxies: *proxy_list_all    # Список доступных опций
-
-    # CLOUDFLARE — сервисы Cloudflare (CDN, DNS, защита)
-  - name: Cloudflare
-    type: select    # Ручной выбор
-    icon: *icon_cloudflare    # Иконка Cloudflare
-    include-all: false    # Только указанные прокси
-    proxies: *proxy_list_all    # Список доступных опций
-
-    # YOUTUBE — видеохостинг YouTube
-  - name: YouTube
-    type: select    # Ручной выбор
-    icon: *icon_youtube    # Иконка YouTube
-    include-all: false    # Только указанные прокси
-    proxies: *proxy_list_youtube    # Специальный список для YouTube
-
-# ============================================================================
-# === ВНЕШНИЕ НАБОРЫ ПРАВИЛ (RULE PROVIDERS) ===
-# ============================================================================
-
-# Провайдеры правил — загружают списки доменов и IP для маршрутизации
-# Позволяют автоматически обновлять правила без изменения конфигурации
-rule-providers:
-    # Telegram — домены и IP-адреса
-  telegram-domains:
-    <<: *rule_behavior_domain_mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/telegram.mrs
-    path: ./rule-sets/telegram-domains.mrs
-
-  telegram-ips:
-    <<: *rule_behavior_ipcidr_yaml
-    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/telegram-ips.yaml
-    path: ./rule-sets/telegram-ips.yaml
-
-    # WhatsApp — домены и IP-адреса
-  whatsapp-domains:
-    <<: *rule_behavior_domain_mrs
-    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/whatsapp.mrs
-    path: ./rule-sets/whatsapp-domains.mrs
-
-  whatsapp-ips:
-    <<: *rule_behavior_ipcidr_yaml
-    url: https://raw.githubusercontent.com/OMchik33/custom-rules/refs/heads/main/mihomo/whatsapp-ips.yaml
-    path: ./rule-sets/whatsapp-ips.yaml
-
-    # Cloudflare — CDN и сервисы
-  cf-domains:
-    <<: *rule_behavior_domain_mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/cloudflare.mrs
-    path: ./rule-sets/cf-domains.mrs
-
-  cf-ips:
-    <<: *rule_behavior_ipcidr_mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geoip/cloudflare.mrs
-    path: ./rule-sets/cf-ips.mrs
-
-    # YouTube — видеохостинг
-  youtube:
-    <<: *rule_behavior_domain_mrs
-    url: https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/youtube.mrs
-    path: ./rule-sets/youtube.mrs
-
-    #  Правила блокировки рекламы и нежелательного контента (OISD)
-    #  oisd_big:
-    #    <<: *rule_behavior_domain_mrs
-    #    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/oisd/big.mrs
-    #    path: ./oisd/big.mrs
-
-    #  ru-bundle:
-    #    <<: *rule_behavior_domain_mrs
-    #    url: https://github.com/legiz-ru/mihomo-rule-sets/raw/main/ru-bundle/rule.mrs
-    #    path: ./ru-bundle/rule.mrs
 
 # ============================================================================
 # === ПРАВИЛА МАРШРУТИЗАЦИИ (RULES) ===
@@ -480,21 +261,6 @@ rules:
     #  - AND,((NETWORK,udp),(DST-PORT,138)),REJECT
     #  - AND,((NETWORK,udp),(DST-PORT,139)),REJECT
     # QUIC-трафик (UDP/443) — специальная обработка
-  - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
-
-    # Мессенджеры и коммуникационные сервисы
-  - OR,((RULE-SET,telegram-domains),(RULE-SET,telegram-ips)),Telegram
-  - OR,((RULE-SET,whatsapp-domains),(RULE-SET,whatsapp-ips)),WhatsApp
-
-    # Стриминг и видео
-  - RULE-SET,youtube,YouTube
-
-    # CDN и облачные сервисы
-  - OR,((RULE-SET,cf-domains),(RULE-SET,cf-ips)),Cloudflare
-    #  - RULE-SET,ru-bundle,SELECTOR
-
-    # Проверка IP — через прокси для анонимности
-  - OR,((DOMAIN,ipwho.is),(DOMAIN,api.ip.sb),(DOMAIN,ipapi.co),(DOMAIN,ipinfo.io),(DOMAIN,2ip.io),(DOMAIN,2ip.ru)),SELECTOR
 
     # Трафик от TUN и mixed-интерфейсов — в главный селектор
   - IN-NAME,tun-in,SELECTOR
