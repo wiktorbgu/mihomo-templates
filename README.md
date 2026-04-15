@@ -75,14 +75,14 @@
 
 ## Выбор подходящего шаблона
 
-| Шаблон    | Файл                                                                                                    | Память    | Сложность    | Для кого                    |
-|-----------|---------------------------------------------------------------------------------------------------------|-----------|--------------|-----------------------------|
-| **Lite**  | [stargate-lite.yaml](stargate-lite.yaml)                                                                | ~20 МБ    | ⭐ Низкая     | Новичков, базовой настройки |
-| **Full**  | [stargate.yaml](stargate.yaml)                                                                          | ~40 МБ    | ⭐⭐⭐ Средняя  | Продвинутых пользователей   |
-| **Mini**  | [stargate-mini.yaml](stargate-mini.yaml)                                                                | ~15 МБ    | ⭐ Низкая     | Минимальный с сервисами     |
-| **Nano**  | [stargate-nano.yaml](stargate-nano.yaml)                                                                | ~15 МБ    | ⭐ Низкая     | Минимальный без сервисов    |
-| **Area**  | [stargate-area.yaml](area/stargate-area.yaml) + [stargate-area.sh](area/user_sh/stargate-area.sh)       | ~25-60 МБ | ⭐⭐ Средняя   | Переключатели по странам    |
-| **Chain** | [stargate-chain.yaml](chain/stargate-chain.yaml) + [stargate-chain.sh](chain/user_sh/stargate-chain.sh) | ~50-90 МБ | ⭐⭐⭐⭐ Высокая | Цепочки через RU-сервер     | 
+| Шаблон    | Файл                                                                                                    | Память    | Сложность   | Для кого                    |
+|-----------|---------------------------------------------------------------------------------------------------------|-----------|-------------|-----------------------------|
+| **Lite**  | [stargate-lite.yaml](stargate-lite.yaml)                                                                | ~20 МБ    | ⭐ Низкая    | Новичков, базовой настройки |
+| **Full**  | [stargate.yaml](stargate.yaml)                                                                          | ~40 МБ    | ⭐⭐ Средняя  | Продвинутых пользователей   |
+| **Mini**  | [stargate-mini.yaml](stargate-mini.yaml)                                                                | ~15 МБ    | ⭐ Низкая    | Минимальный с сервисами     |
+| **Nano**  | [stargate-nano.yaml](stargate-nano.yaml)                                                                | ~15 МБ    | ⭐ Низкая    | Минимальный без сервисов    |
+| **Area**  | [stargate-area.yaml](area/stargate-area.yaml) + [stargate-area.sh](area/user_sh/stargate-area.sh)       | ~25-60 МБ | ⭐⭐⭐ Высокая | Переключатели по странам    |
+| **Chain** | [stargate-chain.yaml](chain/stargate-chain.yaml) + [stargate-chain.sh](chain/user_sh/stargate-chain.sh) | ~50-90 МБ | ⭐⭐⭐ Высокая | Цепочки через RU-сервер     | 
 
 ## Описание шаблонов
 
