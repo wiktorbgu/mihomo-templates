@@ -1,9 +1,17 @@
 #!/bin/sh
 
+# ============================================================================
+# STARGATE-CHAIN.SH
+# Автоматические цепочки через российские сервера
+# ============================================================================
+
+# Запускаться только если используется соответствующий конфиг, иначе пропуск
+if [ "$CONFIG" = "stargate-chain.yaml" ]; then
+
 # Для миграции (совместимости) с предыдущих версий, если нужно изменить URL или ожидаемый статус, а их не указали в переменных окружения
 HEALTH_CHECK_URL="${HEALTH_CHECK_URL:-https://www.gstatic.com/generate_204  }"
 HEALTH_CHECK_EXPECTED_STATUS="${HEALTH_CHECK_EXPECTED_STATUS:-204 }"
-PROVIDER_INTERVAL="${PROVIDER_INTERVAL:-3600 }" 
+PROVIDER_INTERVAL="${PROVIDER_INTERVAL:-3600 }"
 
 # Перепишем оригинальные переменные подписок для использования в stargate-chain.yaml
 # на свои, чтобы не зависеть от оригинала, если там что-то поменялось внезапно
@@ -24,12 +32,12 @@ add_http_provider() {
     PROVIDERS_BLOCK="${PROVIDERS_BLOCK}  ${name}:
     type: http
     url: \"${url}\"
-    interval: ${PROVIDER_INTERVAL} 
+    interval: ${PROVIDER_INTERVAL}
     health-check:
       enable: true
       url: \"${HEALTH_CHECK_URL}\"
       interval: ${PROVIDER_INTERVAL}
-      expected-status: ${HEALTH_CHECK_EXPECTED_STATUS}${header} 
+      expected-status: ${HEALTH_CHECK_EXPECTED_STATUS}${header}
 "
     PROVIDERS_LIST="${PROVIDERS_LIST}      - ${name}
 "
@@ -45,7 +53,7 @@ add_http_chain_provider() {
     PROVIDERS_CHAIN_BLOCK="${PROVIDERS_CHAIN_BLOCK}  ${chain_name}:
     type: http
     url: \"${url}\"
-    interval: ${PROVIDER_INTERVAL} 
+    interval: ${PROVIDER_INTERVAL}
     override:
       dialer-proxy: RU_AUTO           # Сначала идём через RU_AUTO
       exclude-filter: *exclude_ru     # Исключаем RU чтобы не ходить петлями
@@ -90,3 +98,5 @@ fi
 # Экспортируем свои переменные для использования в stargate-chain.yaml, остальные переменные экспортируются внутри entrypoint.sh
 export PROVIDERS_CHAIN_BLOCK
 export PROVIDERS_CHAIN_LIST
+
+fi

@@ -112,7 +112,7 @@ filter_ru: &filter_ru "(?i)🇷🇺|RU"
 
 # Регулярные выражения для исключения протоколов
 exclude_awg: &exclude_awg "ss|shadowsocks|trojan|hysteria|hysteria2|tuic|socks5|http|vless|vmess"
-exclude_wg: &exclude_wg "wireguard"
+exclude_wg: &exclude_wg 'wireguard|direct'
 
 # Источники прокси-серверов (подписки)
 # PROVIDERS_BLOCK — обычные подписки (SUB1, SUB2...)

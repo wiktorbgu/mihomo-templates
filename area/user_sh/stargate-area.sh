@@ -4,7 +4,11 @@
 # STARGATE-AREA.SH
 # Динамически генерирует переключатели по странам на основе SG_COUNTRIES
 # По аналогии с RU_* переключателями в stargate-lite.yaml
-#
+# ============================================================================
+
+# Запускаться только если используется соответствующий конфиг, иначе пропуск
+if [ "$CONFIG" = "stargate-area.yaml" ]; then
+
 # Использование:
 #   SG_COUNTRIES="US,NL,DE,GB,FR,JP,SG,CA,AU,KR,IN,BR,IT,ES,PL"
 #   SG_CODE="false"  # false = фильтр только по FLAG, true = FLAG + CODE
@@ -200,3 +204,5 @@ export AREA_GROUPS_LIST
 export AREA_SELECTOR_PROXIES
 
 echo "stargate-area.sh: Area groups generated successfully"
+
+fi
