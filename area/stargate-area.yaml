@@ -4,6 +4,8 @@
 # Переключатели генерируются автоматически через stargate-area.sh
 # на основе переменной окружения SG_COUNTRIES
 # Документация: https://github.com/MetaCubeX/mihomo/blob/Meta/docs/config.yaml
+# Источник: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/area/stargate-area.yaml
+# Дополнение: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/area/user_sh/stargate-area.sh
 # ============================================================================
 
 # ============================================================================

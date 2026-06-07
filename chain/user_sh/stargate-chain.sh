@@ -3,6 +3,8 @@
 # ============================================================================
 # STARGATE-CHAIN.SH
 # Автоматические цепочки через российские сервера
+# Источник: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/chain/stargate-chain.yaml
+# Дополнение: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/chain/user_sh/stargate-chain.sh
 # ============================================================================
 
 # Запускаться только если используется соответствующий конфиг, иначе пропуск

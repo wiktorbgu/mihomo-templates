@@ -4,6 +4,8 @@
 # STARGATE-AREA.SH
 # Динамически генерирует переключатели по странам на основе SG_COUNTRIES
 # По аналогии с RU_* переключателями в stargate-lite.yaml
+# Источник: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/area/stargate-area.yaml
+# Дополнение: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/area/user_sh/stargate-area.sh
 # ============================================================================
 
 # Запускаться только если используется соответствующий конфиг, иначе пропуск

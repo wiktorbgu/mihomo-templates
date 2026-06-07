@@ -3,6 +3,7 @@
 # Облегчённая конфигурация Mihomo/Meta без сервисов
 # Подходит для устройств с ограниченными ресурсами (роутеры, Raspberry Pi)
 # Документация: https://github.com/MetaCubeX/mihomo/blob/Meta/docs/config.yaml
+# Источник: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/stargate-nano.yaml
 # ============================================================================
 
 # ============================================================================

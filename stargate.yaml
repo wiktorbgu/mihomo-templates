@@ -3,6 +3,7 @@
 # Полная конфигурация Mihomo/Meta с расширенными возможностями маршрутизации
 # Включает поддержку ZKEEN геоданных, GEOIP/GEOSITE правил и CDN-провайдеров
 # Документация: https://github.com/MetaCubeX/mihomo/blob/Meta/docs/config.yaml
+# Источник: https://raw.githubusercontent.com/Viktor45/mh-templates/refs/heads/main/stargate.yaml
 # ============================================================================
 
 # ============================================================================
