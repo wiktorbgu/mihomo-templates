@@ -146,7 +146,7 @@ while read -r CODE; do
   # SG_CODE=false → только флаг: "(?i)🇺🇸"
   # SG_CODE=true  → флаг + код: "(?i)🇺🇸|US"
   if [ "$SG_CODE" = "true" ]; then
-    FILTER_PATTERN="(?i)${FLAG}|${CODE}"
+    FILTER_PATTERN="${FLAG}|${CODE}"
     FILTER_COMMENT="Только серверы ${COUNTRY_NAME} (флаг или код)"
   else
     FILTER_PATTERN="(?i)${FLAG}"
