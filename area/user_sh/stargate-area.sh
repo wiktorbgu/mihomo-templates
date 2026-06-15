@@ -16,7 +16,7 @@ if [ "$CONFIG" = "stargate-area.yaml" ]; then
 #   SG_CODE="false"  # false = фильтр только по FLAG, true = FLAG + CODE
 #
 # Для каждой страны создаются 4 группы:
-#   XX_AUTO     — автоматический выбор (FASTEST → FAILOVER → MANUAL → DIRECT)
+#   XX_AUTO     — автоматический выбор (FASTEST → FAILOVER → MANUAL → AUTO)
 #   XX_MANUAL   — ручной выбор прокси страны
 #   XX_FASTEST  — самый быстрый прокси страны (url-test)
 #   XX_FAILOVER — резервный прокси страны (fallback)
@@ -162,14 +162,14 @@ while read -r CODE; do
     # --------------------------------------------------------------------------
 
     # ${CODE}_AUTO — полностью автоматический выбор (${COUNTRY_NAME})
-    # Приоритет: ${CODE}_FASTEST → ${CODE}_FAILOVER → ${CODE}_MANUAL → DIRECT
+    # Приоритет: ${CODE}_FASTEST → ${CODE}_FAILOVER → ${CODE}_MANUAL → AUTO
   - name: ${CODE}_AUTO
     type: fallback    # Переключение при отказе
     proxies:
       - ${CODE}_FASTEST
       - ${CODE}_FAILOVER
       - ${CODE}_MANUAL
-      - DIRECT
+      - AUTO
     <<: *health_check    # Параметры проверки
 
     # ${CODE}_MANUAL — ручной выбор прокси (${COUNTRY_NAME})
