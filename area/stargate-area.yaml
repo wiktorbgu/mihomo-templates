@@ -31,6 +31,11 @@ log-level: $LOG_LEVEL
 # Включить поддержку IPv6
 ipv6: $IPV6
 
+# Режим поиска процесса, которому принадлежит соединение
+# "always" - искать всегда, "strict" - строгий режим, "off" - не искать
+# Требуется для правил вида PROCESS-NAME, работает только на Linux
+find-process-mode: $FIND_PROCESS_MODE
+
 # Делать задержки более естественными (чтобы не выдавать автоматизацию)
 # Улучшает точность тестирования скорости прокси-серверов
 # Рекомендуется держать включенным для стабильной работы
@@ -150,22 +155,24 @@ $PROVIDERS_BLOCK
 # Проверяет доступность прокси-сервера по указанному URL
 health_check: &health_check
   url: $HEALTH_CHECK_URL                            # URL для проверки доступности прокси
-  interval: $HEALTH_CHECK_INTERVAL                                     # Интервал проверки в секундах
-  timeout: 4000                                     # Таймаут ожидания ответа в миллисекундах
-  max-failed-times: 3                               # Количество неудачных попыток до отметки "неисправен"
+  interval: $HEALTH_CHECK_INTERVAL                  # Интервал проверки в секундах
   expected-status: $HEALTH_CHECK_EXPECTED_STATUS    # Ожидаемый HTTP-статус ответа
+  lazy: $HEALTH_CHECK_LAZY                          # Тестировать сразу при запуске
+  timeout: $HEALTH_CHECK_TIMEOUT                    # Таймаут ожидания ответа в миллисекундах
+  enable: $HEALTH_CHECK_ENABLE                      # Включить проверку доступности прокси (true/false)
+  max-failed-times: 3                               # Количество неудачных попыток до отметки "неисправен"
 
 # Конфигурация URL-тестирования для выбора fastest-прокси
 # Используется для url-test-групп (автоматический выбор по скорости)
 # Измеряет задержку до указанного URL для каждого прокси
 url_test: &url_test
   url: $HEALTH_CHECK_URL                            # URL для измерения задержки
-  interval: $HEALTH_CHECK_INTERVAL                                     # Интервал тестирования в секундах
-  timeout: 4000                                     # Таймаут ожидания ответа в миллисекундах
-  max-failed-times: 3                               # Количество неудачных попыток до отметки "неисправен"
-  lazy: $HEALTH_CHECK_LAZY                                       # Тестировать сразу при запуске
+  interval: $HEALTH_CHECK_INTERVAL                  # Интервал тестирования в секундах
+  lazy: $HEALTH_CHECK_LAZY                          # Тестировать сразу при запуске
   expected-status: $HEALTH_CHECK_EXPECTED_STATUS    # Ожидаемый HTTP-статус
-  tolerance: $TOLERANCE                                     # Допустимая разница задержки (мс)
+  timeout: $HEALTH_CHECK_TIMEOUT                    # Таймаут ожидания ответа в миллисекундах
+  tolerance: $TOLERANCE                             # Допустимая разница задержки (мс)
+  max-failed-times: 3                               # Количество неудачных попыток до отметки "неисправен"
 
 # Специальная конфигурация для AWG-прокси с уменьшенной толерантностью
 url_test_awg: &url_test_awg
@@ -702,8 +709,12 @@ rules:
     #  - AND,((NETWORK,udp),(DST-PORT,137)),REJECT
     #  - AND,((NETWORK,udp),(DST-PORT,138)),REJECT
     #  - AND,((NETWORK,udp),(DST-PORT,139)),REJECT
+    #
+    # Пример выпускаем сервер локальной сети напрямую (без прокси)
+  - SRC-IP-CIDR,192.168.77.7/32,DIRECT  
     # QUIC-трафик (UDP/443) - специальная обработка
   - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
+
 
     # ИИ и инструменты разработки - приоритетная маршрутизация
   - RULE-SET,misc-ai,AI & Разработка

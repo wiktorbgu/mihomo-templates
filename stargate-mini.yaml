@@ -29,6 +29,11 @@ log-level: $LOG_LEVEL
 # Включить поддержку IPv6
 ipv6: $IPV6
 
+# Режим поиска процесса, которому принадлежит соединение
+# "always" - искать всегда, "strict" - строгий режим, "off" - не искать
+# Требуется для правил вида PROCESS-NAME, работает только на Linux
+find-process-mode: $FIND_PROCESS_MODE
+
 # Делать задержки более естественными (чтобы не выдавать автоматизацию)
 # Улучшает точность тестирования скорости прокси-серверов
 # Рекомендуется держать включенным для стабильной работы
@@ -151,7 +156,7 @@ health_check: &health_check
   interval: $HEALTH_CHECK_INTERVAL                 # Интервал проверки в секундах
   expected-status: $HEALTH_CHECK_EXPECTED_STATUS   # Ожидаемый HTTP-статус ответа
   lazy: $HEALTH_CHECK_LAZY                         # Тестировать сразу при запуске
-  timeout: $HEALTH_CHECK_TIMEOUT                   # Таймаут ожидания ответа в секундах
+  timeout: $HEALTH_CHECK_TIMEOUT                   # Таймаут ожидания ответа в миллисекундах
   enable: $HEALTH_CHECK_ENABLE                     # Включить проверку доступности прокси (true/false)
 
 # Конфигурация URL-тестирования для выбора fastest-прокси
@@ -162,6 +167,7 @@ url_test: &url_test
   interval: $HEALTH_CHECK_INTERVAL    # Интервал тестирования в секундах
   lazy: $HEALTH_CHECK_LAZY    # Тестировать сразу при запуске
   expected-status: $HEALTH_CHECK_EXPECTED_STATUS    # Ожидаемый HTTP-статус
+  timeout: $HEALTH_CHECK_TIMEOUT    # Таймаут ожидания ответа в миллисекундах
   tolerance: $TOLERANCE    # Допустимая разница задержки (мс)
 
 # Специальная конфигурация для AWG-прокси с уменьшенной толерантностью

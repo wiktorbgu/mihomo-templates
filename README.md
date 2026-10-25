@@ -516,6 +516,7 @@ SG_COUNTRIES="JP,SG,KR,IN"
 - 🚫 Исключает российские прокси из цепочек (`exclude-filter: *exclude_ru`) чтобы избежать петель
 - 🚫 Исключает WireGuard из цепочек (`exclude-type: wireguard`) - они не поддерживают двойную маршрутизацию
 - 📦 Сохраняет поддержку AWG, SRV и VETH провайдеров из основного entrypoint.sh
+- 🎛️ Поддерживает точечные настройки провайдеров (`PROVIDER_FILTER`, `PROVIDER_HEADER`, `PROVIDER_UDP_<NAME>` и другие) - так же, как остальные шаблоны
 
 **Особенности:**
 - 🔗 Двойная маршрутизация для восстановления доступности интернета
@@ -599,17 +600,47 @@ SG_COUNTRIES="JP,SG,KR,IN"
 
 **Переменные подписок:**
 
-| Переменная                     | Описание                           | Значения по умолчанию                  |
-| :----------------------------- | :--------------------------------- | :------------------------------------- |
-| `SUB1`, `SUB2`, ...            | URL подписок на прокси-серверы     |                                        |
-| `SRV0`, `SRV1`, ...            | Локальные серверы в формате YAML   |                                        |
-| `HEALTH_CHECK_ENABLE`          | Включить проверку здоровья прокси  | `true` / `false`                       |
-| `HEALTH_CHECK_URL`             | URL для проверки прокси            | `https://www.gstatic.com/generate_204` |
-| `HEALTH_CHECK_EXPECTED_STATUS` | Ожидаемый HTTP статус              | `204`                                  |
-| `HEALTH_CHECK_INTERVAL`        | Интервал проверки здоровья (сек)   | `200`                                  |
-| `HEALTH_CHECK_TIMEOUT`         | Таймаут ожидания ответа (сек)      | `5`                                    |
-| `HEALTH_CHECK_LAZY`            | Отложенная проверка прокси         | `true` / `false`                       |
-| `PROVIDER_INTERVAL`            | Интервал обновления подписок (сек) | `3600`                                 |
+| Переменная                     | Описание                                          | Значения по умолчанию                  |
+| :----------------------------- | :------------------------------------------------ | :------------------------------------- |
+| `SUB1`, `SUB2`, ...            | URL подписок на прокси-серверы                    |                                        |
+| `SRV0`, `SRV1`, ...            | Локальные серверы в формате YAML                  |                                        |
+| `HEALTH_CHECK_ENABLE`          | Включить проверку здоровья прокси                 | `true` / `false`                       |
+| `HEALTH_CHECK_URL`             | URL для проверки прокси                           | `https://www.gstatic.com/generate_204` |
+| `HEALTH_CHECK_EXPECTED_STATUS` | Ожидаемый HTTP статус                             | `204`                                  |
+| `HEALTH_CHECK_INTERVAL`        | Интервал проверки здоровья (сек)                  | `300`                                  |
+| `HEALTH_CHECK_TIMEOUT`         | Таймаут ожидания ответа (мс)                      | `5000`                                 |
+| `HEALTH_CHECK_LAZY`            | Отложенная проверка прокси                        | `true` / `false`                       |
+| `PROVIDER_INTERVAL`            | Интервал обновления подписок (сек)                | `3600`                                 |
+
+**Точечные настройки провайдеров:**
+
+Все переменные ниже применяются сразу ко всем подпискам. Чтобы задать значение только для одной подписки, добавьте суффикс с ее именем через подчеркивание - например, `PROVIDER_FILTER_SUB1`.
+
+| Переменная                                    | Описание                                                          | Пример значения             |
+| :-------------------------------------------- | :---------------------------------------------------------------- | :-------------------------- |
+| `PROVIDER_FILTER`                             | Регулярное выражение для отбора имен серверов в подписке          | `(?i)🇺🇸\|US`               |
+| `PROVIDER_EXCLUDE_FILTER`                     | Регулярное выражение для исключения имен серверов из подписки     | `(?i)expire\|test`         |
+| `PROVIDER_EXCLUDE_TYPE`                       | Исключение протоколов серверов через `\|`                         | `wireguard\|direct`        |
+| `PROVIDER_HEADER`                             | Дополнительные HTTP-заголовки для запроса подписки                 | `X-Custom:value`            |
+| `PROVIDER_TFO`                                | TCP Fast Open (только с суффиксом подписки)                       | `true` / `false`            |
+| `PROVIDER_MPTCP`                              | MultiPath TCP (только с суффиксом подписки)                       | `true` / `false`            |
+| `PROVIDER_UDP`                                | Разрешить UDP (только с суффиксом подписки)                       | `true` / `false`            |
+| `PROVIDER_UDP_OVER_TCP`                       | Передавать UDP через TCP (только с суффиксом подписки)            | `true` / `false`            |
+| `PROVIDER_DOWN`                               | Ограничение скорости скачивания, КБ/с (только с суффиксом)        | `10000`                     |
+| `PROVIDER_UP`                                 | Ограничение скорости отправки, КБ/с (только с суффиксом)          | `5000`                      |
+| `PROVIDER_SKIP_CERT_VERIFY`                   | Не проверять TLS-сертификат (только с суффиксом)                  | `true` / `false`            |
+| `PROVIDER_NAME_CERT_VERIFY`                   | Проверка имени сервера в сертификате (только с суффиксом)          | `true` / `false`            |
+| `PROVIDER_DIALER_PROXY`                       | Имя прокси или группы для соединений провайдера (с суффиксом)     | `RU_AUTO`                   |
+| `PROVIDER_ADDITIONAL_PREFIX`                  | Фиксированный префикс к именам серверов (только с суффиксом)       | `[US] `                     |
+| `PROVIDER_ADDITIONAL_SUFFIX`                  | Фиксированный суффикс к именам серверов (только с суффиксом)       | ` - premium`                |
+
+Параметры `PROVIDER_TFO`, `PROVIDER_MPTCP`, `PROVIDER_UDP`, `PROVIDER_UDP_OVER_TCP`, `PROVIDER_DOWN`, `PROVIDER_UP`, `PROVIDER_SKIP_CERT_VERIFY`, `PROVIDER_NAME_CERT_VERIFY`, `PROVIDER_DIALER_PROXY`, `PROVIDER_ADDITIONAL_PREFIX` и `PROVIDER_ADDITIONAL_SUFFIX` работают только с суффиксом конкретной подписки - например, `PROVIDER_UDP_SUB1`. Переменные `PROVIDER_FILTER`, `PROVIDER_EXCLUDE_FILTER`, `PROVIDER_EXCLUDE_TYPE`, `PROVIDER_HEADER` и `PROVIDER_INTERVAL` работают и глобально, и точечно.
+
+```bash
+# Только первая подписка: оставляем серверы США и разрешаем UDP
+/container envs add list=MIHOMO key=PROVIDER_FILTER_SUB1 value="(?i)🇺🇸"
+/container envs add list=MIHOMO key=PROVIDER_UDP_SUB1 value="true"
+```
 
 **Переменные TUN/TPROXY (генерируются автоматически):**
 
@@ -617,11 +648,14 @@ SG_COUNTRIES="JP,SG,KR,IN"
 | :-------------------------- | :-------------------------------------------------------- | :-------------------------- |
 | `TUN`                       | Принудительно включить TUN вместо TPROXY                  | `1` / `0`                   |
 | `TUN_IN_AUTOCONFIG`         | Блок конфигурации TUN/TPROXY (генерируется entrypoint.sh) |                             |
-| `TUN_STACK`                 | Стек TUN                                                  | `system`, `mixed`, `gvisor` |
+| `TUN_STACK`                 | Стек TUN                                                  | `mips`, `gvisor`, `system` |
 | `TUN_AUTO_DETECT_INTERFACE` | Автоопределение интерфейса                                | `true` / `false`            |
 | `TUN_AUTO_ROUTE`            | Автоматическая маршрутизация                              | `true` / `false`            |
 | `TUN_AUTO_REDIRECT`         | Автоматический редирект                                   | `true` / `false`            |
-| `TUN_INET4_ADDRESS`         | Адрес TUN интерфейса                                      | `172.16.0.1/30`             |
+| `TUN_INET4_ADDRESS`         | Адрес TUN интерфейса                                      | `198.19.0.1/30`             |
+| `TUN_INET6_ADDRESS`         | Адрес TUN интерфейса (IPv6)                               | `fdfe:dcba:9876::1/126`    |
+| `TUN_DISABLE_ICMP_FORWARDING` | Запретить проброс ICMP через TUN                         | `true` / `false`            |
+| `IP_VERSION`                | Версия IP для дополнительных VETH-интерфейсов             | `dual`, `ipv4`, `ipv6`     |
 
 **Переменные шаблона Area (только stargate-area.sh):**
 
@@ -697,7 +731,8 @@ SG_COUNTRIES="JP,SG,KR,IN"
 ### Технические параметры (для любопытных)
 
 **Tolerance в URLTest:** Это допуск задержки в миллисекундах - если разница между текущим и протестированным прокси меньше допуска, переключение не происходит.
-- Текущее: 50 мс для основных групп (AUTO/FASTEST), 30 мс для AWG групп
+- Задается переменной `TOLERANCE`, значение по умолчанию в контейнере - 10 мс
+- Для групп AWG допуск фиксирован на 30 мс
 - Измените на 10 мс, если хотите, чтобы прокси переключались более агрессивно (чаще)
 - Оставьте 80-100 мс, если хотите большей стабильности
 
